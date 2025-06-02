@@ -19,7 +19,7 @@ public class GamePanel extends JPanel implements Runnable{
     int FPS = 120;
 
     float spriteScale = 2;
-    float tileSize = screenWidth / (defaultWidth * spriteScale);
+    float tileSize = screenWidth / (defaultWidth * spriteScale); // 64
     float oldTileSize;
     double ratio = 1;
 
@@ -103,10 +103,10 @@ public class GamePanel extends JPanel implements Runnable{
         ratio = (double)tileSize/oldTileSize;
 
         //TODO
-        // player.worldXPos *= ratio;
-        // player.worldYPos *= ratio;
-        // player2.worldXPos *= ratio;
-        // player2.worldYPos *= ratio;
+        player.worldXPos *= ratio;
+        player.worldYPos *= ratio;
+        player2.worldXPos *= ratio;
+        player2.worldYPos *= ratio;
 
     }
 

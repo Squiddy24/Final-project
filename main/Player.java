@@ -12,6 +12,8 @@ public class Player {
     double worldXPos;
     double worldYPos;
 
+    double hitboxXPos;
+    double hitboxYPos;
 
     int speed = 4;
 
@@ -43,6 +45,9 @@ public class Player {
         worldXPos = startX;
         worldYPos = startY;
 
+        hitboxXPos = startX;
+        hitboxYPos = startY;
+
         screenX = gamePanel.screenWidth/2 - (gamePanel.tileSize / 2);
         screenY = gamePanel.screenHeight/2 - (gamePanel.tileSize / 2);
 
@@ -58,19 +63,20 @@ public class Player {
         
         //Updates Hitbox
         //hitbox.setRect((int)worldXPos, (int)worldYPos, (int)gamePanel.tileSize, (int)gamePanel.tileSize);
-        hitbox.setRect((double)(worldXPos) + 10, (double)(worldYPos) + 10,44,44);
 
         
-        // worldYPos += input.directionMap.get("Vertical") * scaledSpeed;
-        // worldXPos += input.directionMap.get("Horizontal") * scaledSpeed;
+        worldYPos += input.directionMap.get("Vertical") * scaledSpeed;
+        worldXPos += input.directionMap.get("Horizontal") * scaledSpeed;
 
-        worldYPos += input.directionMap.get("Vertical") * speed;
-        worldXPos += input.directionMap.get("Horizontal") * speed;
+        hitboxYPos += input.directionMap.get("Vertical") * speed;
+        hitboxXPos += input.directionMap.get("Horizontal") * speed;
 
         playerScreenX = (int)(playerAverageX - worldXPos + screenX);
         playerScreenY = (int)(playerAverageY - worldYPos + screenY);
         
         float dynamicZoom;
+
+        hitbox.setRect((double)(hitboxXPos) + 10, (double)(hitboxYPos) + 10,44,44);
 
         //Zoom padding
         if (playerScreenX > gamePanel.screenWidth - zoomPadding || playerScreenX < zoomPadding){
@@ -129,13 +135,17 @@ public class Player {
 
     public void drawPlayer(Graphics2D g2, InputHandler otherInput){ 
         facing = otherInput.directionMap.get("Horizontal") != 0 ? otherInput.directionMap.get("Horizontal") : facing;
-        System.out.println(facing);
         g2.drawImage(animationHandler(), 
         (int)(facing == 1 ? playerScreenX : playerScreenX + gamePanel.tileSize),  //x
         (int)playerScreenY, //y
         (int)gamePanel.tileSize * facing, (int)gamePanel.tileSize,null);
         
         g2.drawRect(hitbox.x,hitbox.y,hitbox.width,hitbox.height);
+
+        g2.setColor(Color.CYAN);
+        g2.drawRect((int)hitboxXPos + 10, (int)hitboxYPos + 10, 44, 44);
+
+
 
     }
 }
