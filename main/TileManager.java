@@ -59,6 +59,7 @@ public class TileManager {
                 float[] pos = {i*gamePanel.tileSize,j*gamePanel.tileSize};
                 levelTiles[i][j] = new Tile(pos,tileImages[tileMap.get(j)[i]]);
                 if (tileMap.get(j)[i] == 1){
+                    // TODO NOT COLLISION 
                     levelTiles[i][j].collision = true;
                 }
             }

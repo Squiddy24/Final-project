@@ -7,6 +7,7 @@ public class CollisionChecker {
     int rightCol;
     int topRow;
     int bottomRow;
+    double zoomFactor;
     Tile[][] levelTiles;
 
     CollisionChecker(GamePanel gamePanel, Tile[][] levelTiles){
@@ -20,6 +21,8 @@ public class CollisionChecker {
         int hitboxRight = (int)player.hitbox.x + player.hitbox.width;
         int hitboxTop = (int)player.hitbox.y;
         int hitboxBottom = (int)player.hitbox.y + player.hitbox.height;
+        zoomFactor = ((gamePanel.tileSize/64)) ;
+        System.out.println(zoomFactor);
 
         for (int i = 0; i < levelTiles[0].length; i++) {
             for (int j = 0; j < levelTiles.length; j++) {
@@ -33,7 +36,7 @@ public class CollisionChecker {
                     Rectangle tileBounds = new Rectangle((int)tileLeft, (int)tileTop, 64, 64);
                     
                     if (tileBounds.intersects(player.hitbox)){
-                        System.out.println("hit");
+
                         float DistTop = Math.abs(hitboxTop - tileBottom);
                         float DistBottom = Math.abs(hitboxBottom - tileTop);
                         float DistLeft = Math.abs(hitboxLeft - tileRight);
@@ -42,7 +45,7 @@ public class CollisionChecker {
                         //Detects hits on the top of a block and moves the player out of it
                         if (DistBottom < DistLeft && DistBottom < DistRight && DistBottom < DistTop){
                             //player_hitbox.bottom = block.rect.top + 1;
-                            player.worldYPos = tileTop - gamePanel.tileSize + 5*gamePanel.spriteScale - 1;
+                            player.worldYPos = (tileTop * zoomFactor) - gamePanel.tileSize + 5*gamePanel.spriteScale - 1;
                             player.hitboxYPos = tileTop - 64 + 5*2 - 1;
 
                         }
@@ -50,7 +53,7 @@ public class CollisionChecker {
                         //Detects hits on the bottom of a block and moves the player out of it
                         else if (DistTop < DistLeft && DistTop < DistRight && DistTop < DistBottom){
                             //self.player_hitbox.top = block.rect.bottom;
-                            player.worldYPos = tileBottom - 5*gamePanel.spriteScale + 1;
+                            player.worldYPos = (tileBottom * zoomFactor) - 5*gamePanel.spriteScale + 1;
                             player.hitboxYPos = tileBottom - 5*2 + 1;
 
                         }
@@ -58,7 +61,7 @@ public class CollisionChecker {
                         //Detects hits on the Left of a block and moves the player out of it
                         else if (DistRight < DistLeft && DistRight < DistTop && DistRight < DistBottom){
                             //self.player_hitbox.right = block.rect.left;
-                            player.worldXPos = tileLeft - gamePanel.tileSize + 5*gamePanel.spriteScale - 1;
+                            player.worldXPos = (tileLeft * zoomFactor) - gamePanel.tileSize + 5*gamePanel.spriteScale - 1;
                             player.hitboxXPos = tileLeft - 64 + 5*2 - 1;
 
                         }
@@ -66,7 +69,7 @@ public class CollisionChecker {
                         //Detects hits on the right of a block and moves the player out of it
                         else if (DistLeft < DistRight && DistLeft < DistTop && DistLeft < DistBottom){
                             //self.player_hitbox.left = block.rect.right;
-                            player.worldXPos = tileRight - 5*gamePanel.spriteScale + 1;
+                            player.worldXPos = (tileRight * zoomFactor) - 5*gamePanel.spriteScale + 1;
                             player.hitboxXPos = tileRight - 5*2 + 1;
 
                         }           

@@ -22,6 +22,7 @@ public class GamePanel extends JPanel implements Runnable{
     float tileSize = screenWidth / (defaultWidth * spriteScale); // 64
     float oldTileSize;
     double ratio = 1;
+    //double cumulativeRatio = 1;
 
     InputHandler inputP1 = new InputHandler(KeyEvent.VK_W,KeyEvent.VK_S,KeyEvent.VK_A,KeyEvent.VK_D, this); 
     InputHandler inputP2 = new InputHandler(KeyEvent.VK_UP,KeyEvent.VK_DOWN,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT, this); 
@@ -101,6 +102,7 @@ public class GamePanel extends JPanel implements Runnable{
         tileSize = screenWidth / (defaultWidth * spriteScale);
 
         ratio = (double)tileSize/oldTileSize;
+        //cumulativeRatio *= ratio;
 
         //TODO
         player.worldXPos *= ratio;

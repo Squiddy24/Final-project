@@ -26,8 +26,6 @@ public class Player {
     int playerScreenX;
     int playerScreenY;
     int facing = 1;
-
-    double zoomFactor;
     boolean collided = false;
 
     //Rectangle hitbox = new Rectangle(6 * gamePanel.spriteScale, 12 * gamePanel.spriteScale, 20 * gamePanel.spriteScale, 20 * gamePanel.spriteScale);
@@ -50,9 +48,6 @@ public class Player {
 
         screenX = gamePanel.screenWidth/2 - (gamePanel.tileSize / 2);
         screenY = gamePanel.screenHeight/2 - (gamePanel.tileSize / 2);
-
-        zoomFactor = (gamePanel.tileSize / 64.0);
-
         hitbox = new Rectangle((int)worldXPos, (int)worldYPos, 44, 44);
         getPlayerImages();
     }
@@ -71,8 +66,8 @@ public class Player {
         hitboxYPos += input.directionMap.get("Vertical") * speed;
         hitboxXPos += input.directionMap.get("Horizontal") * speed;
 
-        playerScreenX = (int)(playerAverageX - worldXPos + screenX);
-        playerScreenY = (int)(playerAverageY - worldYPos + screenY);
+        playerScreenX = (int)((playerAverageX - (worldXPos * gamePanel.ratio) + screenX));
+        playerScreenY = (int)((playerAverageY - (worldYPos * gamePanel.ratio) + screenY));
         
         float dynamicZoom;
 
