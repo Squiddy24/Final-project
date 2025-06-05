@@ -24,12 +24,21 @@ public class TileManager {
 
     public void getTileImage(){
         try {
-            tileImages[0] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/3.png"));
-            tileImages[1] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/1.png"));
-            tileImages[2] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/2.png"));
+            tileImages[0] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/Background.png"));
+            tileImages[1] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/Brick.png"));
+            tileImages[2] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/BannerTop.png"));
+            tileImages[3] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/BannerBottom.png"));
+            tileImages[4] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/CandleTop.png"));
+            tileImages[5] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/CandleBottom.png"));
+            tileImages[6] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/Spike.png"));
+            tileImages[7] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/LavaBrick.png"));
+            tileImages[8] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/EndFlag.png"));
+
+
+
 
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println("tile broke :(");
         }
     }
 
@@ -58,10 +67,21 @@ public class TileManager {
             for (int j = 0; j < tileMap.size(); j++) {
                 float[] pos = {i*gamePanel.tileSize,j*gamePanel.tileSize};
                 levelTiles[i][j] = new Tile(pos,tileImages[tileMap.get(j)[i]]);
-                if (tileMap.get(j)[i] == 1){
+                
+                if (tileMap.get(j)[i] == 1 || tileMap.get(j)[i] == 7){
                     // TODO NOT COLLISION 
                     levelTiles[i][j].collision = true;
                 }
+                //Damage
+                if (tileMap.get(j)[i] == 7){
+                    levelTiles[i][j].damage = true;
+                }
+                if (tileMap.get(j)[i] == 8){
+                    gamePanel.endGoal[0] = (int)(i * gamePanel.tileSize);
+                    gamePanel.endGoal[1] = (int)(j * gamePanel.tileSize);
+
+                }
+                
             }
         }
     }

@@ -25,6 +25,7 @@ public class CollisionChecker {
 
         for (int i = 0; i < levelTiles[0].length; i++) {
             for (int j = 0; j < levelTiles.length; j++) {
+                
                 if (levelTiles[j][i].collision == true){
 
                     float tileLeft = levelTiles[j][i].pos[0];
@@ -48,6 +49,7 @@ public class CollisionChecker {
                             player.accelerationDueToGravity = 0;
                             player.jumpVelocity = 0;
                             player.grounded = true;
+                            player.canDash = true;
                         }
 
                         //Detects hits on the bottom of a block and moves the player out of it
@@ -77,6 +79,13 @@ public class CollisionChecker {
 
                         }           
                     }            
+                }
+                if (levelTiles[j][i].damage == true){
+
+                    Rectangle tileBounds = new Rectangle((int)levelTiles[j][i].pos[0], (int)levelTiles[j][i].pos[1], 64, 64);
+                    if (tileBounds.intersects(player.hitbox) && player.stunImmunity <= 0){
+                        player.currentStunTime = player.STUNDURATION;
+                    }
                 }
             }
         }

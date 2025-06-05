@@ -16,6 +16,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int screenWidth = 1152; //screenTileWidth * tileSize; // 1152
     public final int screenHeight = 768; //screenTileHeight * tileSize; // 768
 
+    int[] endGoal = {0,0};
     int FPS = 120;
 
     float spriteScale = 2;
@@ -79,6 +80,9 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void update(){
+
+        int distanceToGoal = (int)((Math.sqrt(Math.pow(player.worldXPos - endGoal[0],2) + Math.pow(player.worldYPos - endGoal[1],2))) / tileSize);
+        System.out.println( distanceToGoal);
         //Finds the adverage of players
         playerAverageX = tileSize;
         playerAverageY = tileSize;
@@ -121,10 +125,10 @@ public class GamePanel extends JPanel implements Runnable{
         tileManager.draw(g2, playerAverageX, playerAverageY - CAMERAOFFSETY);
         //g2.setColor(Color.RED);
 
-        player.drawPlayer(g2, inputP2);
+        player.drawPlayer(g2);
         //g2.setColor(Color.BLUE);
 
-        player2.drawPlayer(g2, inputP1);
+        player2.drawPlayer(g2);
         //g2.setColor(Color.GREEN);
 
 

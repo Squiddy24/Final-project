@@ -55,15 +55,29 @@ public class Player {
     final float RUNACCELERATION = 0.05f;
     final float RUNDECELERATION = 0.2f;
 
-    
+    //Dashing
+    int lastDirection = 1;
+    boolean canDash = true;
+    boolean dashing;
+    int currentDashTime;
+    int currentDashCooldown;
+    final int MAXDASHTIME = 30;
+    final int DASHCOOLDOWN = 40;
+    final float DASHPOWER = 7;
+    float xCarryoverMomentum = 0;
+    float yCarryoverMomentum = 0;
 
+    final int STUNDURATION = 60;
+    final int IMMUNITYDURATION = 240;
+    int currentStunTime = 0;
+    int stunImmunity = 120;
 
     //Rectangle hitbox = new Rectangle(6 * gamePanel.spriteScale, 12 * gamePanel.spriteScale, 20 * gamePanel.spriteScale, 20 * gamePanel.spriteScale);
     Rectangle hitbox;
 
     //animation stuff to clean up TODO
     int blinkTimer = 240;
-    int blinkDuration = 30;
+    int blinkDuration = 120;
 
     public Player(int startX, int startY, GamePanel gamePanel, TileManager tileManager, InputHandler input, int playerNumber){
         this.playerNumber = playerNumber;
@@ -80,13 +94,22 @@ public class Player {
     }
 
     public void update(float playerAverageX, float playerAverageY){        
-        
+
         //Projects to screenSpace
-        playerScreenX = (int)((playerAverageX - (worldXPos * gamePanel.ratio) + screenX));
-        playerScreenY = (int)((playerAverageY - (worldYPos * gamePanel.ratio) + screenY));
+        playerScreenX = (int)((worldXPos + screenX) - playerAverageX + gamePanel.tileSize);
+        playerScreenY = (int)((worldYPos + screenY) - playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
 
-        applyForces(); 
-
+        if (currentStunTime > 0){
+            currentStunTime -=1;
+            if (currentStunTime == 0){
+                stunImmunity = IMMUNITYDURATION;
+            }
+        }else{
+            if (stunImmunity > 0){
+                stunImmunity -=1;
+            }
+            applyForces(); 
+        }
         //updateZoom(); //TODO this breaks everyhting
         
         hitbox.setRect(worldXPos,worldYPos,gamePanel.tileSize/2,gamePanel.tileSize/2);
@@ -126,13 +149,136 @@ public class Player {
     public void applyForces(){
         xVelocity = 0;
         yVelocity = 0;
+        if (!dashing){
+            lastDirection = dashDirection();
+            applyGravity();
+            horizontalMovment();
+            jump();
+        }
 
-        applyGravity();
-        horizontalMovment();
-        jump();
+        dash();
+
 
         worldXPos += xVelocity;
         worldYPos += yVelocity + jumpVelocity;
+    }
+
+    public int dashDirection(){
+        int direction;
+
+        boolean up = input.keyMap.get("Up");
+        boolean down = input.keyMap.get("Down");
+        boolean left = input.keyMap.get("Left");
+        boolean right = input.keyMap.get("Right");
+
+        direction = 
+        (!up  && !down && !left && !right) ? lastDirection : //Last
+        (up  && !down && !left && !right) ? 1 :  //Up
+        (up  && !down && !left && right)  ? 2 :  //Up-Right
+        (!up && !down && !left && right)  ? 3 :  //Right
+        (!up && down  && !left && right)  ? 4 :  //Down-Right
+        (!up && down  && !left && !right) ? 5 :  //Down
+        (!up && down  && left  && !right) ? 6 :  //Down-Left
+        (!up && !down && left  && !right) ? 7 :  //Left
+        (up  && !down && left  && !right) ? 8 :  //Up-Left
+        2;                                       //More than 2 (Up-Right defult)
+
+        return direction;
+        
+    }
+
+    public void dash(){
+        currentDashCooldown -=1;
+
+        //Start Dash
+        if (input.keyMap.get("Dash") && !dashing && currentDashCooldown < 0 && canDash){
+            runSpeed = 0;
+            dashing = true;
+            accelerationDueToGravity = 0;
+            jumpVelocity = 0;
+            currentJumpTime = 0;
+            canDash = false;
+            jumping = false;
+            currentDashTime = MAXDASHTIME;
+        }
+
+        if (dashing){
+            currentDashTime -= 1;
+            float dashVelocityVertical = 0;
+            float dashVelocityHorizontal = 0;
+
+            switch (lastDirection) {
+                case 1:      
+                    dashVelocityVertical = -DASHPOWER;
+                    break;
+                case 2: 
+                    dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(45)));
+                    dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(45)));
+                    break;
+                case 3:
+                    dashVelocityHorizontal = DASHPOWER;        
+                    break;
+                case 4:   
+                    dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(315)));
+                    dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(315)));     
+                    break;
+                case 5:         
+                    dashVelocityVertical = DASHPOWER;
+                    break;
+                case 6:      
+                    dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(225)));
+                    dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(225)));    
+                    break;
+                case 7: 
+                    dashVelocityHorizontal = -DASHPOWER;         
+                    break;  
+                case 8:      
+                    dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(135)));
+                    dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(135)));      
+                    break;  
+                default:
+                    break;
+            }
+
+            xVelocity = dashVelocityHorizontal;
+            yVelocity = dashVelocityVertical;
+
+            //End Dash
+            if (currentDashTime <= 0){
+                dashing = false;
+                currentDashCooldown = DASHCOOLDOWN;
+
+
+                if (lastDirection == 2 || lastDirection == 3 || lastDirection == 4){ //Right
+                    xCarryoverMomentum = dashVelocityHorizontal/2;
+                }
+                if (lastDirection == 6 || lastDirection == 7 || lastDirection == 8){ //Left
+                    xCarryoverMomentum = dashVelocityHorizontal/2;
+                }
+                if (lastDirection == 4 || lastDirection == 5 || lastDirection == 6){ //Down
+                    yCarryoverMomentum = dashVelocityVertical / 2;
+                }
+                if (lastDirection == 1 || lastDirection == 2 || lastDirection == 8){ //Up
+                    yCarryoverMomentum = dashVelocityVertical / 2;
+                }
+
+            }
+        }
+
+        xVelocity += xCarryoverMomentum;
+        yVelocity += yCarryoverMomentum;
+        
+        if (xCarryoverMomentum > 0){
+            xCarryoverMomentum = Math.max(xCarryoverMomentum - 0.03f, 0);
+        }else{
+            xCarryoverMomentum = Math.min(xCarryoverMomentum + 0.03f, 0);
+        }
+
+        if (yCarryoverMomentum > 0){
+            yCarryoverMomentum = Math.max(yCarryoverMomentum - 0.03f, 0);
+        }else{
+            yCarryoverMomentum = Math.min(yCarryoverMomentum + 0.03f, 0);
+        }
     }
 
     public void horizontalMovment(){
@@ -191,22 +337,48 @@ public class Player {
     }
 
     public BufferedImage animationHandler(){
-        if (blinkTimer <= 0){
-            blinkDuration -=1;
-            if (blinkDuration <= 0){
-                blinkTimer = 240;
-                blinkDuration = 30;
+        blinkTimer -=1;
+        if (currentStunTime % 2 != 0){return playerImages.get(null);}
+        if (!canDash){
+            if (currentStunTime <= 0){
+                if(dashing){
+                    return playerImages.get("NDDash");
+                }else if (blinkDuration > 0 && blinkTimer < 0){
+                    blinkDuration -= 1;
+                    if (blinkDuration == 0){
+                        blinkTimer = 240;
+                        blinkDuration = 120;
+                    }
+                    return playerImages.get("NDBlink");
+
+                }else{
+                    return playerImages.get("NDBase");
+                }
+            }else{
+                return playerImages.get("NDDeath");
             }
-            return playerImages.get("Blink");
-
+        }else{
+            if (currentStunTime <= 0){
+                if(dashing){
+                    return playerImages.get("Dash");
+                }else if (blinkDuration > 0 && blinkTimer < 0){
+                    blinkDuration -= 1;
+                    if (blinkDuration == 0){
+                        blinkTimer = 240;
+                        blinkDuration = 120;
+                    }
+                    return playerImages.get("Blink");
+                }else{
+                    return playerImages.get("Base");
+                }
+            }else{
+                return playerImages.get("Death");
+            }
         }
-        blinkTimer -= 1;
-
-        return playerImages.get("Base");
     }
 
-    public void drawPlayer(Graphics2D g2, InputHandler otherInput){ 
-        facing = otherInput.directionMap.get("Horizontal") != 0 ? otherInput.directionMap.get("Horizontal") : facing;
+    public void drawPlayer(Graphics2D g2){ 
+        facing = input.directionMap.get("Horizontal") != 0 ? input.directionMap.get("Horizontal") : facing;
         g2.drawImage(animationHandler(), 
         (int)(facing == 1 ? playerScreenX : playerScreenX + gamePanel.tileSize/2),  //x
         (int)playerScreenY, //y
