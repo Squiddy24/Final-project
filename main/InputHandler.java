@@ -4,15 +4,17 @@ import java.awt.event.KeyListener;
 import java.util.HashMap;
 
 public class InputHandler implements KeyListener{
-    public boolean up,down,left,right;
-    public int upKey,downKey,leftKey,rightKey;
+    public boolean up,down,left,right,space;
+    public int upKey,downKey,leftKey,rightKey,jumpKey,dashKey;
     public GamePanel panel;
 
-    public InputHandler(int upKey, int downKey, int leftKey, int rightKey, GamePanel panel){
+    public InputHandler(int upKey, int downKey, int leftKey, int rightKey, int jumpKey, int dashKey, GamePanel panel){
         this.upKey = upKey;
         this.downKey = downKey;
         this.leftKey = leftKey;
         this.rightKey = rightKey;
+        this.jumpKey = jumpKey;
+        this.dashKey = dashKey;
         this.panel = panel;
     }
     public HashMap<String, Boolean> keyMap = new HashMap<String, Boolean>() {{
@@ -20,6 +22,8 @@ public class InputHandler implements KeyListener{
         put("Down", false);
         put("Left", false);
         put("Right", false);
+        put("Jump",false);
+        put("Dash", false);
     }};
 
     public HashMap<String, Integer> directionMap = new HashMap<String, Integer>() {{
@@ -35,13 +39,8 @@ public class InputHandler implements KeyListener{
         keyMap.put("Down", code == downKey || keyMap.get("Down"));
         keyMap.put("Left", code == leftKey || keyMap.get("Left"));
         keyMap.put("Right", code == rightKey || keyMap.get("Right"));
-
-        if (code == KeyEvent.VK_EQUALS) {
-            panel.zoom((float) -0.1);
-        }
-        if (code == KeyEvent.VK_MINUS) {
-            panel.zoom((float)0.1);
-        }
+        keyMap.put("Jump", code == jumpKey || keyMap.get("Jump"));
+        keyMap.put("Dash", code == dashKey || keyMap.get("Dash"));
 
         updateDirectionMap();
     }
@@ -54,6 +53,8 @@ public class InputHandler implements KeyListener{
         keyMap.put("Down", code != downKey && keyMap.get("Down"));
         keyMap.put("Left", code != leftKey && keyMap.get("Left"));
         keyMap.put("Right", code != rightKey && keyMap.get("Right"));
+        keyMap.put("Jump", code != jumpKey && keyMap.get("Jump"));
+        keyMap.put("Dash", code != dashKey && keyMap.get("Dash"));
 
         updateDirectionMap();
     }

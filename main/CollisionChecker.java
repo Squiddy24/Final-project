@@ -22,7 +22,6 @@ public class CollisionChecker {
         int hitboxTop = (int)player.hitbox.y;
         int hitboxBottom = (int)player.hitbox.y + player.hitbox.height;
         zoomFactor = ((gamePanel.tileSize/64)) ;
-        System.out.println(zoomFactor);
 
         for (int i = 0; i < levelTiles[0].length; i++) {
             for (int j = 0; j < levelTiles.length; j++) {
@@ -45,32 +44,36 @@ public class CollisionChecker {
                         //Detects hits on the top of a block and moves the player out of it
                         if (DistBottom < DistLeft && DistBottom < DistRight && DistBottom < DistTop){
                             //player_hitbox.bottom = block.rect.top + 1;
-                            player.worldYPos = (tileTop * zoomFactor) - gamePanel.tileSize + 5*gamePanel.spriteScale - 1;
-                            player.hitboxYPos = tileTop - 64 + 5*2 - 1;
-
+                            player.worldYPos = Math.ceil((tileTop * zoomFactor) - gamePanel.tileSize + 32);
+                            player.accelerationDueToGravity = 0;
+                            player.jumpVelocity = 0;
+                            player.grounded = true;
                         }
 
                         //Detects hits on the bottom of a block and moves the player out of it
                         else if (DistTop < DistLeft && DistTop < DistRight && DistTop < DistBottom){
                             //self.player_hitbox.top = block.rect.bottom;
-                            player.worldYPos = (tileBottom * zoomFactor) - 5*gamePanel.spriteScale + 1;
-                            player.hitboxYPos = tileBottom - 5*2 + 1;
+                            player.worldYPos = Math.ceil((tileBottom * zoomFactor));
+                            player.jumping = false;
+                            player.currentJumpTime = 0;
+                            player.jumpVelocity = 0;
+
 
                         }
 
                         //Detects hits on the Left of a block and moves the player out of it
                         else if (DistRight < DistLeft && DistRight < DistTop && DistRight < DistBottom){
                             //self.player_hitbox.right = block.rect.left;
-                            player.worldXPos = (tileLeft * zoomFactor) - gamePanel.tileSize + 5*gamePanel.spriteScale - 1;
-                            player.hitboxXPos = tileLeft - 64 + 5*2 - 1;
+                            player.worldXPos = Math.ceil((tileLeft * zoomFactor) - gamePanel.tileSize + 32);
+                            player.runSpeed = -player.runSpeed / 3;
 
                         }
 
                         //Detects hits on the right of a block and moves the player out of it
                         else if (DistLeft < DistRight && DistLeft < DistTop && DistLeft < DistBottom){
                             //self.player_hitbox.left = block.rect.right;
-                            player.worldXPos = (tileRight * zoomFactor) - 5*gamePanel.spriteScale + 1;
-                            player.hitboxXPos = tileRight - 5*2 + 1;
+                            player.worldXPos = Math.ceil((tileRight * zoomFactor));
+                            player.runSpeed = -player.runSpeed / 3;
 
                         }           
                     }            

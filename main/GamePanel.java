@@ -24,15 +24,17 @@ public class GamePanel extends JPanel implements Runnable{
     double ratio = 1;
     //double cumulativeRatio = 1;
 
-    InputHandler inputP1 = new InputHandler(KeyEvent.VK_W,KeyEvent.VK_S,KeyEvent.VK_A,KeyEvent.VK_D, this); 
-    InputHandler inputP2 = new InputHandler(KeyEvent.VK_UP,KeyEvent.VK_DOWN,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT, this); 
+    final int CAMERAOFFSETY = 100;
+
+    InputHandler inputP1 = new InputHandler(KeyEvent.VK_W,KeyEvent.VK_S,KeyEvent.VK_A,KeyEvent.VK_D, KeyEvent.VK_SPACE, KeyEvent.VK_SHIFT, this); 
+    InputHandler inputP2 = new InputHandler(KeyEvent.VK_UP,KeyEvent.VK_DOWN,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT, KeyEvent.VK_M, KeyEvent.VK_N, this); 
 
     Thread gameThread;
 
     TileManager tileManager = new TileManager(this);
 
-    public Player player = new Player(0,0,this, tileManager, inputP1);
-    public Player player2 = new Player(0, 0,this, tileManager, inputP2);
+    public Player player = new Player(0,0,this, tileManager, inputP1, 1);
+    public Player player2 = new Player(0, 0,this, tileManager, inputP2, 2);
 
     Player[] players = {player ,player2};
 
@@ -89,8 +91,8 @@ public class GamePanel extends JPanel implements Runnable{
         playerAverageX /= players.length;
         playerAverageY /= players.length;
 
-        player.update(playerAverageX, playerAverageY);
-        player2.update(playerAverageX, playerAverageY);
+        player.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
+        player2.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
 
 
     }
@@ -116,24 +118,24 @@ public class GamePanel extends JPanel implements Runnable{
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
-        tileManager.draw(g2, playerAverageX, playerAverageY);
-        g2.setColor(Color.RED);
+        tileManager.draw(g2, playerAverageX, playerAverageY - CAMERAOFFSETY);
+        //g2.setColor(Color.RED);
 
         player.drawPlayer(g2, inputP2);
-        g2.setColor(Color.BLUE);
+        //g2.setColor(Color.BLUE);
 
         player2.drawPlayer(g2, inputP1);
-        g2.setColor(Color.GREEN);
+        //g2.setColor(Color.GREEN);
 
 
         //TODO DEBUG
-        for (int i = 0; i < collisionChecker.levelTiles[0].length; i++) {
-            for (int j = 0; j < collisionChecker.levelTiles.length; j++) {
-                if (collisionChecker.levelTiles[j][i].collision == true){
-                g2.drawRect((int)collisionChecker.levelTiles[j][i].pos[0], (int)collisionChecker.levelTiles[j][i].pos[1], 64, 64);
-                }
-            }
-        }
+        // for (int i = 0; i < collisionChecker.levelTiles[0].length; i++) {
+        //     for (int j = 0; j < collisionChecker.levelTiles.length; j++) {
+        //         if (collisionChecker.levelTiles[j][i].collision == true){
+        //         g2.drawRect((int)collisionChecker.levelTiles[j][i].pos[0], (int)collisionChecker.levelTiles[j][i].pos[1], 64, 64);
+        //         }
+        //     }
+        // }
         g2.dispose(); //removes stored data
     }
 
