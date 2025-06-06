@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+
 import javax.imageio.ImageIO;
 
 public class TileManager {
@@ -14,12 +15,13 @@ public class TileManager {
     BufferedImage[] tileImages;
     ArrayList<int[]> tileMap = new ArrayList<int[]>();
     Tile[][] levelTiles;
+    int timer = 500;
 
     public TileManager(GamePanel gamePanel){
         this.gamePanel = gamePanel;
         tileImages = new BufferedImage[10];
         getTileImage();
-        loadLevel("/main/LevelData/0.txt");
+        loadLevel("/main/LevelData/1.txt");
     }
 
     public void getTileImage(){
@@ -34,30 +36,29 @@ public class TileManager {
             tileImages[7] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/LavaBrick.png"));
             tileImages[8] = ImageIO.read(getClass().getResourceAsStream("/main/Images/TileSprites/EndFlag.png"));
 
-
-
-
         } catch (Exception e) {
             System.out.println("tile broke :(");
         }
     }
 
     public void loadLevel (String levelFilePath){
+        tileMap.clear();
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(levelFilePath)));
-            
-            for (int tileHorizontal = 0; tileHorizontal < (gamePanel.screenHeight / (gamePanel.defaultHeight * gamePanel.spriteScale)); tileHorizontal++) { //TODO veritable screen height
-                String[] line = br.readLine().split(" ");
-                int[] numLine = new int[line.length];
-                for (int i = 0; i < line.length; i++) {
-                    numLine[i] = Integer.parseInt(line[i]);
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                String[] characters = line.split(" ");
+                int[] numLine = new int[characters.length];
+                for (int i = 0; i < characters.length; i++) {
+                    numLine[i] = Integer.parseInt(characters[i]);
                 }
                 tileMap.add(numLine);
+
             }
             br.close();
-
         } catch (Exception e) {
-            System.out.println("Error Loading Level!");
+            e.printStackTrace();
         }
 
         levelTiles = new Tile[tileMap.get(0).length][tileMap.size()];
@@ -76,6 +77,7 @@ public class TileManager {
                 if (tileMap.get(j)[i] == 7){
                     levelTiles[i][j].damage = true;
                 }
+
                 if (tileMap.get(j)[i] == 8){
                     gamePanel.endGoal[0] = (int)(i * gamePanel.tileSize);
                     gamePanel.endGoal[1] = (int)(j * gamePanel.tileSize);
@@ -87,6 +89,11 @@ public class TileManager {
     }
 
     public void draw(Graphics2D g2, float playerAverageX, float playerAverageY){
+        timer -= 1;
+        if (timer < 0){ //TODO debug
+            loadLevel("/main/LevelData/0.txt");
+            timer = 999999999;
+        }
         for (int i = 0; i < levelTiles.length; i++) {
             for (int j = 0; j < levelTiles[0].length; j++) {
                 float tileScreenX = (levelTiles[i][j].pos[0]/64) * gamePanel.tileSize;

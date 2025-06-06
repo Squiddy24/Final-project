@@ -1,11 +1,16 @@
 package main;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 
 public class Player {
+
+    LinkedList<int[]> trail = new LinkedList<>();
+    final int MAXTRAINLENGTH = 30;
 
     int playerNumber;
 
@@ -113,6 +118,13 @@ public class Player {
         //updateZoom(); //TODO this breaks everyhting
         
         hitbox.setRect(worldXPos,worldYPos,gamePanel.tileSize/2,gamePanel.tileSize/2);
+        int[] trailtPos = {(int)(worldXPos + 3),(int)(worldYPos - 1.5*gamePanel.tileSize)};
+        trail.add(trailtPos);
+        if (trail.size() > MAXTRAINLENGTH){
+            trail.removeFirst();
+        }
+
+
         gamePanel.collisionChecker.checkTile(this, gamePanel);
     }
 
@@ -338,7 +350,7 @@ public class Player {
 
     public BufferedImage animationHandler(){
         blinkTimer -=1;
-        if (currentStunTime % 2 != 0){return playerImages.get(null);}
+        if ((currentStunTime > 20 || currentStunTime < 10) && currentStunTime > 0){return playerImages.get(null);}
         if (!canDash){
             if (currentStunTime <= 0){
                 if(dashing){
@@ -378,6 +390,24 @@ public class Player {
     }
 
     public void drawPlayer(Graphics2D g2){ 
+        
+        // for (int[] pos : trail) {
+        //     g2.setColor(new Color(255,255,255,10));
+        //     int trailScreenX = (int)((pos[0] + screenX) - gamePanel.playerAverageX + gamePanel.tileSize);
+        //     int trailScreenY = (int)((pos[1] + screenY) - gamePanel.playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
+
+        //     g2.fillRect(trailScreenX, trailScreenY, (int)(gamePanel.tileSize /2.5), (int)(gamePanel.tileSize /2.5));
+        // }
+
+        if(currentStunTime == 0){
+            for (int pos = 0; pos < trail.size(); pos++) {
+                g2.setColor(new Color(255,255,255,2*pos));
+                int trailScreenX = (int)((trail.get(pos)[0] + screenX) - gamePanel.playerAverageX + gamePanel.tileSize);
+                int trailScreenY = (int)((trail.get(pos)[1] + screenY) - gamePanel.playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
+
+                g2.fillRect(trailScreenX, trailScreenY, (int)(gamePanel.tileSize /2.5), (int)(gamePanel.tileSize /2.5));
+            }
+        }
         facing = input.directionMap.get("Horizontal") != 0 ? input.directionMap.get("Horizontal") : facing;
         g2.drawImage(animationHandler(), 
         (int)(facing == 1 ? playerScreenX : playerScreenX + gamePanel.tileSize/2),  //x

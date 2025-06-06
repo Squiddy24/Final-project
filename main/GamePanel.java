@@ -42,7 +42,7 @@ public class GamePanel extends JPanel implements Runnable{
     float playerAverageX;
     float playerAverageY;
         
-    CollisionChecker collisionChecker = new CollisionChecker(this,tileManager.levelTiles);
+    CollisionChecker collisionChecker = new CollisionChecker(this);
     public GamePanel(){
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
         this.setBackground(Color.BLACK);
@@ -82,7 +82,7 @@ public class GamePanel extends JPanel implements Runnable{
     public void update(){
 
         int distanceToGoal = (int)((Math.sqrt(Math.pow(player.worldXPos - endGoal[0],2) + Math.pow(player.worldYPos - endGoal[1],2))) / tileSize);
-        System.out.println( distanceToGoal);
+        //System.out.println( distanceToGoal); //TODO
         //Finds the adverage of players
         playerAverageX = tileSize;
         playerAverageY = tileSize;

@@ -8,11 +8,10 @@ public class CollisionChecker {
     int topRow;
     int bottomRow;
     double zoomFactor;
-    Tile[][] levelTiles;
+    //Tile[][] levelTiles = gamePanel.tileManager.levelTiles;
 
-    CollisionChecker(GamePanel gamePanel, Tile[][] levelTiles){
+    CollisionChecker(GamePanel gamePanel){
         this.gamePanel = gamePanel;
-        this.levelTiles = levelTiles;
 
     }
 
@@ -23,15 +22,15 @@ public class CollisionChecker {
         int hitboxBottom = (int)player.hitbox.y + player.hitbox.height;
         zoomFactor = ((gamePanel.tileSize/64)) ;
 
-        for (int i = 0; i < levelTiles[0].length; i++) {
-            for (int j = 0; j < levelTiles.length; j++) {
+        for (int i = 0; i < gamePanel.tileManager.levelTiles[0].length; i++) {
+            for (int j = 0; j < gamePanel.tileManager.levelTiles.length; j++) {
                 
-                if (levelTiles[j][i].collision == true){
+                if (gamePanel.tileManager.levelTiles[j][i].collision == true){
 
-                    float tileLeft = levelTiles[j][i].pos[0];
-                    float tileRight = levelTiles[j][i].pos[0] + 64;
-                    float tileTop = levelTiles[j][i].pos[1];
-                    float tileBottom = levelTiles[j][i].pos[1] + 64;
+                    float tileLeft = gamePanel.tileManager.levelTiles[j][i].pos[0];
+                    float tileRight = gamePanel.tileManager.levelTiles[j][i].pos[0] + 64;
+                    float tileTop = gamePanel.tileManager.levelTiles[j][i].pos[1];
+                    float tileBottom = gamePanel.tileManager.levelTiles[j][i].pos[1] + 64;
 
                     Rectangle tileBounds = new Rectangle((int)tileLeft, (int)tileTop, 64, 64);
                     
@@ -80,9 +79,9 @@ public class CollisionChecker {
                         }           
                     }            
                 }
-                if (levelTiles[j][i].damage == true){
+                if (gamePanel.tileManager.levelTiles[j][i].damage == true){
 
-                    Rectangle tileBounds = new Rectangle((int)levelTiles[j][i].pos[0], (int)levelTiles[j][i].pos[1], 64, 64);
+                    Rectangle tileBounds = new Rectangle((int)gamePanel.tileManager.levelTiles[j][i].pos[0], (int)gamePanel.tileManager.levelTiles[j][i].pos[1], 64, 64);
                     if (tileBounds.intersects(player.hitbox) && player.stunImmunity <= 0){
                         player.currentStunTime = player.STUNDURATION;
                     }
