@@ -15,9 +15,6 @@ public class MenuManger implements MouseListener {
         this.buttons = buttons;
     }
 
-    public void update(){
-
-    }
     public void draw(Graphics2D g2, GamePanel gamePanel){
         
         g2.drawImage(gamePanel.tileManager.tileImages[1], 0,0,gamePanel.screenWidth,gamePanel.screenHeight,null);

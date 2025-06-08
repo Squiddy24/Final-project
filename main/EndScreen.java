@@ -8,9 +8,7 @@ public class EndScreen {
     public EndScreen(){
 
     }
-    public void update(){
-
-    }
+    
     public void draw(Graphics2D g2, int distanceToGoalP1, int distanceToGoalP2, GamePanel gamePanel){
         g2.drawImage(gamePanel.tileManager.tileImages[1], 0,0,gamePanel.screenWidth,gamePanel.screenHeight,null);
 

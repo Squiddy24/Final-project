@@ -19,8 +19,8 @@ public class GamePanel extends JPanel implements Runnable{
         new Button(new Rectangle(125,500,100,100),tileManager.tileImages[3],"1") {
             @Override
             public void click() {
-                if(inMenu){
-                    inMenu = false;
+                if(menuState == "MAIN"){
+                    menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/1.txt");
                     player.worldXPos = 129;
                     player.worldYPos = 129;
@@ -33,8 +33,8 @@ public class GamePanel extends JPanel implements Runnable{
         new Button(new Rectangle(325, 500, 100, 100),tileManager.tileImages[3],"2") {
             @Override
             public void click() {
-                if (inMenu){
-                    inMenu = false;
+                if (menuState == "MAIN"){
+                    menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/2.txt");
                     player.worldXPos = 129;
                     player.worldYPos = 512;
@@ -47,8 +47,8 @@ public class GamePanel extends JPanel implements Runnable{
         new Button(new Rectangle(525, 500, 100, 100),tileManager.tileImages[3],"3") {
             @Override
             public void click() {
-                if (inMenu){
-                    inMenu = false;
+                if (menuState == "MAIN"){
+                    menuState = "GAME";
                     System.out.println("click");
                     tileManager.loadLevel("/main/LevelData/3.txt");
                     player.worldXPos = 129;
@@ -63,8 +63,8 @@ public class GamePanel extends JPanel implements Runnable{
         new Button(new Rectangle(725, 500, 100, 100),tileManager.tileImages[3],"4") {
             @Override
             public void click() {
-                if (inMenu){
-                    inMenu = false;
+                if (menuState == "MAIN"){
+                    menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/4.txt");
                     player.worldXPos = 129;
                     player.worldYPos = 1088;
@@ -77,8 +77,8 @@ public class GamePanel extends JPanel implements Runnable{
         new Button(new Rectangle(925, 500, 100, 100),tileManager.tileImages[3],"5") {
             @Override
             public void click() {
-                if (inMenu){
-                    inMenu = false;
+                if (menuState == "MAIN"){
+                    menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/5.txt");
                     player.worldXPos = 129;
                     player.worldYPos = 1856;
@@ -91,7 +91,7 @@ public class GamePanel extends JPanel implements Runnable{
         new Button(new Rectangle(925, 650, 200, 100),tileManager.tileImages[3],"Exit") {
             @Override
             public void click() {
-                if (inMenu){                    
+                if (menuState == "MAIN"){                    
                     window.setVisible(false);
                     window.dispose();
                     System.exit(0);
@@ -104,22 +104,22 @@ public class GamePanel extends JPanel implements Runnable{
 
     MenuManger menu = new MenuManger(buttons);
 
-    public final int defaultWidth = 9;
-    public final int defaultHeight = 6;
-
-    public final int screenWidth = 1152; //screenTileWidth * tileSize; // 1152
-    public final int screenHeight = 768; //screenTileHeight * tileSize; // 768
+    public final int screenWidth = 1152; //18 tiles wide times 64 pixels per tile
+    public final int screenHeight = 768; //18 tiles tall times 64 pixels per tile
+    private final int FPS = 120;
 
     int[] endGoal = {0,0};
-    int FPS = 120;
     int distanceToGoalP1= 100;
     int distanceToGoalP2=100;
-    boolean inMenu = true;
-    boolean inEndScreen;
+
+    String menuState = "MAIN";
+
+    // boolean inMenu = true;
+    // boolean inEndScreen;
     int endScreenTimerCurrent;
     final int ENDSCREENTIMERMAX = 120;
     float spriteScale = 2;
-    float tileSize = screenWidth / (defaultWidth * spriteScale); // 64
+    float tileSize = 64;
     float oldTileSize;
     double ratio = 1;
     //double cumulativeRatio = 1;
@@ -180,21 +180,19 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void update(){
-        if (inMenu){
-            menu.update();
-        }else if (inEndScreen){
+        if (menuState == "END"){
             if (endScreenTimerCurrent <= 0) {
-                inEndScreen = false;
-                inMenu = true;
+                menuState = "MAIN";
             }
             endScreenTimerCurrent -= 1;
-        }else{
+
+        }else if (menuState == "GAME"){
             distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldXPos - endGoal[0],2) + Math.pow(player.worldYPos - endGoal[1],2))) / tileSize);
             distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldXPos - endGoal[0],2) + Math.pow(player2.worldYPos - endGoal[1],2))) / tileSize);
 
             if (distanceToGoalP1 < 1 || distanceToGoalP2 < 1 ){
                 System.out.println(distanceToGoalP1 + " " +distanceToGoalP2);
-                inEndScreen = true;
+                menuState = "END";
                 endScreenTimerCurrent = ENDSCREENTIMERMAX;
                 player = new Player(0,0,this, tileManager, inputP1, 1);
                 player2 = new Player(0, 0,this, tileManager, inputP2, 2);
@@ -221,14 +219,20 @@ public class GamePanel extends JPanel implements Runnable{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        if (inMenu){
-            menu.draw(g2,this);
-        }else if (inEndScreen){
-            endScreen.draw(g2, distanceToGoalP1, distanceToGoalP2, this);
-        }else{
-            tileManager.draw(g2, playerAverageX, playerAverageY - CAMERAOFFSETY);
-            player.drawPlayer(g2);
-            player2.drawPlayer(g2);
+        switch (menuState) {
+            case "MAIN":
+                menu.draw(g2,this);
+                break;
+
+            case "END":
+                endScreen.draw(g2, distanceToGoalP1, distanceToGoalP2, this);
+                break;
+        
+            default:
+                tileManager.draw(g2, playerAverageX, playerAverageY - CAMERAOFFSETY);
+                player.drawPlayer(g2);
+                player2.drawPlayer(g2);
+                break;
         }
 
         g2.dispose(); //removes stored data
