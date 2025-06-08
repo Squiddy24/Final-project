@@ -1,6 +1,7 @@
 package main;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -16,8 +17,7 @@ public class Player {
 
     public final int zoomPadding = 200;
 
-    double worldXPos;
-    double worldYPos;
+    Point worldPos = new Point(100,100);
 
     int speed = 4;
 
@@ -84,25 +84,22 @@ public class Player {
     int blinkTimer = 240;
     int blinkDuration = 120;
 
-    public Player(int startX, int startY, GamePanel gamePanel, TileManager tileManager, InputHandler input, int playerNumber){
+    public Player(GamePanel gamePanel, TileManager tileManager, InputHandler input, int playerNumber){
         this.playerNumber = playerNumber;
         this.gamePanel = gamePanel;
         this.input = input;
 
-        worldXPos = startX;
-        worldYPos = startY;
-
         screenX = gamePanel.screenWidth/2 - (gamePanel.tileSize / 2);
         screenY = gamePanel.screenHeight/2 - (gamePanel.tileSize / 2);
-        hitbox = new Rectangle((int)worldXPos, (int)worldYPos, 44, 44);
+        hitbox = new Rectangle((int)worldPos.x, (int)worldPos.x, 44, 44);
         getPlayerImages();
     }
 
     public void update(float playerAverageX, float playerAverageY){        
 
         //Projects to screenSpace
-        playerScreenX = (int)((worldXPos + screenX) - playerAverageX + gamePanel.tileSize);
-        playerScreenY = (int)((worldYPos + screenY) - playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
+        playerScreenX = (int)((worldPos.x + screenX) - playerAverageX + gamePanel.tileSize);
+        playerScreenY = (int)((worldPos.y + screenY) - playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
 
         if (currentStunTime > 0){
             currentStunTime -=1;
@@ -117,8 +114,8 @@ public class Player {
         }
         //updateZoom(); //TODO this breaks everyhting
         
-        hitbox.setRect(worldXPos,worldYPos,gamePanel.tileSize/2,gamePanel.tileSize/2);
-        int[] trailtPos = {(int)(worldXPos + 3),(int)(worldYPos - 1.5*gamePanel.tileSize)};
+        hitbox.setRect(worldPos.x,worldPos.y,gamePanel.tileSize/2,gamePanel.tileSize/2);
+        int[] trailtPos = {(int)(worldPos.x + 3),(int)(worldPos.y - 1.5*gamePanel.tileSize)};
         trail.add(trailtPos);
         if (trail.size() > MAXTRAINLENGTH){
             trail.removeFirst();
@@ -148,8 +145,8 @@ public class Player {
         dash();
 
 
-        worldXPos += xVelocity;
-        worldYPos += yVelocity + jumpVelocity;
+        worldPos.x += xVelocity;
+        worldPos.y += yVelocity + jumpVelocity;
     }
 
     public int dashDirection(){

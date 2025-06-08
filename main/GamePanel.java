@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
@@ -22,11 +23,9 @@ public class GamePanel extends JPanel implements Runnable{
                 if(menuState == "MAIN"){
                     menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/1.txt");
-                    player.worldXPos = 129;
-                    player.worldYPos = 129;
-                    player2.worldXPos = 129;
-                    player2.worldYPos = 129;
-            }
+                    player.worldPos = new Point(129,129);
+                    player2.worldPos = new Point(129,129);
+                }
             }
         },
 
@@ -36,10 +35,8 @@ public class GamePanel extends JPanel implements Runnable{
                 if (menuState == "MAIN"){
                     menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/2.txt");
-                    player.worldXPos = 129;
-                    player.worldYPos = 512;
-                    player2.worldXPos = 129;
-                    player2.worldYPos = 512;
+                    player.worldPos = new Point(129,512);
+                    player2.worldPos = new Point(129,512);
                 }
             }
         },
@@ -51,10 +48,8 @@ public class GamePanel extends JPanel implements Runnable{
                     menuState = "GAME";
                     System.out.println("click");
                     tileManager.loadLevel("/main/LevelData/3.txt");
-                    player.worldXPos = 129;
-                    player.worldYPos = 704;
-                    player2.worldXPos = 129;
-                    player2.worldYPos = 704;
+                    player.worldPos = new Point(129,704);
+                    player2.worldPos = new Point(129,704);
                 }
             }
                 
@@ -66,10 +61,8 @@ public class GamePanel extends JPanel implements Runnable{
                 if (menuState == "MAIN"){
                     menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/4.txt");
-                    player.worldXPos = 129;
-                    player.worldYPos = 1088;
-                    player2.worldXPos = 129;
-                    player2.worldYPos = 1088;
+                    player.worldPos = new Point(129,1088);
+                    player2.worldPos = new Point(129,1088);
                 }
             }
         },
@@ -80,10 +73,8 @@ public class GamePanel extends JPanel implements Runnable{
                 if (menuState == "MAIN"){
                     menuState = "GAME";
                     tileManager.loadLevel("/main/LevelData/5.txt");
-                    player.worldXPos = 129;
-                    player.worldYPos = 1856;
-                    player2.worldXPos = 129;
-                    player2.worldYPos = 1856;
+                    player.worldPos = new Point(129,1856);
+                    player2.worldPos = new Point(129,1856);
                 }
             }
         },
@@ -131,8 +122,8 @@ public class GamePanel extends JPanel implements Runnable{
 
     Thread gameThread;
 
-    public Player player = new Player(100,100,this, tileManager, inputP1, 1);
-    public Player player2 = new Player(100, 100,this, tileManager, inputP2, 2);
+    public Player player = new Player(this, tileManager, inputP1, 1);
+    public Player player2 = new Player(this, tileManager, inputP2, 2);
 
     Player[] players = {player ,player2};
 
@@ -187,15 +178,15 @@ public class GamePanel extends JPanel implements Runnable{
             endScreenTimerCurrent -= 1;
 
         }else if (menuState == "GAME"){
-            distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldXPos - endGoal[0],2) + Math.pow(player.worldYPos - endGoal[1],2))) / tileSize);
-            distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldXPos - endGoal[0],2) + Math.pow(player2.worldYPos - endGoal[1],2))) / tileSize);
+            distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldPos.x - endGoal[0],2) + Math.pow(player.worldPos.y - endGoal[1],2))) / tileSize);
+            distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldPos.x - endGoal[0],2) + Math.pow(player2.worldPos.y - endGoal[1],2))) / tileSize);
 
             if (distanceToGoalP1 < 1 || distanceToGoalP2 < 1 ){
                 System.out.println(distanceToGoalP1 + " " +distanceToGoalP2);
                 menuState = "END";
                 endScreenTimerCurrent = ENDSCREENTIMERMAX;
-                player = new Player(0,0,this, tileManager, inputP1, 1);
-                player2 = new Player(0, 0,this, tileManager, inputP2, 2);
+                player = new Player(this, tileManager, inputP1, 1);
+                player2 = new Player(this, tileManager, inputP2, 2);
                 players = new Player[]{player ,player2};
                 playSoundEffect(3);
             }
@@ -204,8 +195,8 @@ public class GamePanel extends JPanel implements Runnable{
             playerAverageY = tileSize;
 
             for (Player player : players) {
-            playerAverageX += player.worldXPos;
-            playerAverageY += player.worldYPos;
+            playerAverageX += player.worldPos.x;
+            playerAverageY += player.worldPos.y;
             }
 
             playerAverageX /= players.length;
