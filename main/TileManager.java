@@ -68,7 +68,7 @@ public class TileManager {
         //Creates list of tiles
         for (int i = 0; i < tileMap.get(0).length; i++) {
             for (int j = 0; j < tileMap.size(); j++) {
-                float[] pos = {i*gamePanel.tileSize,j*gamePanel.tileSize};
+                float[] pos = {i*gamePanel.TILESIZE,j*gamePanel.TILESIZE};
                 levelTiles[i][j] = new Tile(pos,tileImages[tileMap.get(j)[i]]);
                 
                 if (tileMap.get(j)[i] == 2 || tileMap.get(j)[i] == 3 || tileMap.get(j)[i] == 8){
@@ -81,8 +81,8 @@ public class TileManager {
                 }
 
                 if (tileMap.get(j)[i] == 9){
-                    gamePanel.endGoal[0] = (int)(i * gamePanel.tileSize);
-                    gamePanel.endGoal[1] = (int)(j * gamePanel.tileSize);
+                    gamePanel.endGoal[0] = (int)(i * gamePanel.TILESIZE);
+                    gamePanel.endGoal[1] = (int)(j * gamePanel.TILESIZE);
 
                 }
                 
@@ -93,17 +93,17 @@ public class TileManager {
     public void draw(Graphics2D g2, float playerAverageX, float playerAverageY){
         for (int i = 0; i < levelTiles.length; i++) {
             for (int j = 0; j < levelTiles[0].length; j++) {
-                float tileScreenX = (levelTiles[i][j].pos[0]/64) * gamePanel.tileSize;
-                float tileScreenY = (levelTiles[i][j].pos[1]/64) * gamePanel.tileSize;
+                float tileScreenX = (levelTiles[i][j].pos[0]/64) * gamePanel.TILESIZE;
+                float tileScreenY = (levelTiles[i][j].pos[1]/64) * gamePanel.TILESIZE;
 
                 
                 g2.drawImage(levelTiles[i][j].image, 
-                (int)(tileScreenX - playerAverageX + gamePanel.player.screenX + gamePanel.tileSize), 
-                (int)(tileScreenY - playerAverageY + gamePanel.player.screenY + gamePanel.tileSize),
+                (int)(tileScreenX - playerAverageX + gamePanel.player.screenX + gamePanel.TILESIZE), 
+                (int)(tileScreenY - playerAverageY + gamePanel.player.screenY + gamePanel.TILESIZE),
                 //(int)(tileScreenX - playerAverageX + gamePanel.player.screenX - gamePanel.tileSize/2), 
                 //(int)(tileScreenY - playerAverageY + gamePanel.player.screenY - gamePanel.tileSize/2),
-                (int)Math.ceil(gamePanel.tileSize),
-                (int)Math.ceil(gamePanel.tileSize),
+                (int)Math.ceil(gamePanel.TILESIZE),
+                (int)Math.ceil(gamePanel.TILESIZE),
                 null);
             }
         }

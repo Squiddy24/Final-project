@@ -5,12 +5,12 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
-public class AudioHandler {
+public class AudioManager {
 
     URL[] soundURLs = new URL[4];
     Clip clip;
 
-    public AudioHandler(){
+    public AudioManager(){
         soundURLs[0] = getClass().getResource("/main/Audio/MainTheme.wav");
         soundURLs[1] = getClass().getResource("/main/Audio/Dash.wav");
         soundURLs[2] = getClass().getResource("/main/Audio/Hit.wav");

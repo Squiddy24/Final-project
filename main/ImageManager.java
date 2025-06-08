@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
-public class ImageHandler {
-    public ImageHandler(){
+public class ImageManager {
+    public ImageManager(){
 
     }
 

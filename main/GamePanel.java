@@ -12,125 +12,40 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable{
+    //Managers
     TileManager tileManager = new TileManager(this);
-    AudioHandler audioHandler = new AudioHandler();
-    EndScreen endScreen = new EndScreen();
+    AudioManager audioHandler = new AudioManager();
+    EndScreenManager endScreen = new EndScreenManager();
+    MenuManger menu = new MenuManger(setButtons());
 
-    Button[] buttons = {
-        new Button(new Rectangle(125,500,100,100),tileManager.tileImages[3],"1") {
-            @Override
-            public void click() {
-                if(menuState == "MAIN"){
-                    menuState = "GAME";
-                    tileManager.loadLevel("/main/LevelData/1.txt");
-                    player.worldPos = new Point(129,129);
-                    player2.worldPos = new Point(129,129);
-                }
-            }
-        },
-
-        new Button(new Rectangle(325, 500, 100, 100),tileManager.tileImages[3],"2") {
-            @Override
-            public void click() {
-                if (menuState == "MAIN"){
-                    menuState = "GAME";
-                    tileManager.loadLevel("/main/LevelData/2.txt");
-                    player.worldPos = new Point(129,512);
-                    player2.worldPos = new Point(129,512);
-                }
-            }
-        },
-
-        new Button(new Rectangle(525, 500, 100, 100),tileManager.tileImages[3],"3") {
-            @Override
-            public void click() {
-                if (menuState == "MAIN"){
-                    menuState = "GAME";
-                    System.out.println("click");
-                    tileManager.loadLevel("/main/LevelData/3.txt");
-                    player.worldPos = new Point(129,704);
-                    player2.worldPos = new Point(129,704);
-                }
-            }
-                
-        },
-
-        new Button(new Rectangle(725, 500, 100, 100),tileManager.tileImages[3],"4") {
-            @Override
-            public void click() {
-                if (menuState == "MAIN"){
-                    menuState = "GAME";
-                    tileManager.loadLevel("/main/LevelData/4.txt");
-                    player.worldPos = new Point(129,1088);
-                    player2.worldPos = new Point(129,1088);
-                }
-            }
-        },
-
-        new Button(new Rectangle(925, 500, 100, 100),tileManager.tileImages[3],"5") {
-            @Override
-            public void click() {
-                if (menuState == "MAIN"){
-                    menuState = "GAME";
-                    tileManager.loadLevel("/main/LevelData/5.txt");
-                    player.worldPos = new Point(129,1856);
-                    player2.worldPos = new Point(129,1856);
-                }
-            }
-        },
-
-        new Button(new Rectangle(925, 650, 200, 100),tileManager.tileImages[3],"Exit") {
-            @Override
-            public void click() {
-                if (menuState == "MAIN"){                    
-                    window.setVisible(false);
-                    window.dispose();
-                    System.exit(0);
-                    
-                }
-            }
-        },
-    };
-
-
-    MenuManger menu = new MenuManger(buttons);
-
-    public final int screenWidth = 1152; //18 tiles wide times 64 pixels per tile
-    public final int screenHeight = 768; //18 tiles tall times 64 pixels per tile
+    public final int SCREENWIDTH = 1152; //18 tiles wide times 64 pixels per tile
+    public final int SCREENHEIGHT = 768; //18 tiles tall times 64 pixels per tile
+    public final int TILESIZE = 64;
+    private final int CAMERAOFFSETY = 100;
     private final int FPS = 120;
 
     int[] endGoal = {0,0};
-    int distanceToGoalP1= 100;
-    int distanceToGoalP2=100;
+    int distanceToGoalP1 = 100;
+    int distanceToGoalP2 =100;
 
     String menuState = "MAIN";
-
-    // boolean inMenu = true;
-    // boolean inEndScreen;
     int endScreenTimerCurrent;
     final int ENDSCREENTIMERMAX = 120;
-    float spriteScale = 2;
-    float tileSize = 64;
-    float oldTileSize;
-    double ratio = 1;
-    //double cumulativeRatio = 1;
 
-    final int CAMERAOFFSETY = 100;
 
-    InputHandler inputP1 = new InputHandler(KeyEvent.VK_W,KeyEvent.VK_S,KeyEvent.VK_A,KeyEvent.VK_D, KeyEvent.VK_SPACE, KeyEvent.VK_SHIFT, this); 
-    InputHandler inputP2 = new InputHandler(KeyEvent.VK_UP,KeyEvent.VK_DOWN,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT, KeyEvent.VK_M, KeyEvent.VK_N, this); 
+    private InputManager inputP1 = new InputManager(KeyEvent.VK_W,KeyEvent.VK_S,KeyEvent.VK_A,KeyEvent.VK_D, KeyEvent.VK_SPACE, KeyEvent.VK_SHIFT, this); 
+    private InputManager inputP2 = new InputManager(KeyEvent.VK_UP,KeyEvent.VK_DOWN,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT, KeyEvent.VK_M, KeyEvent.VK_N, this); 
 
     Thread gameThread;
 
     public Player player = new Player(this, tileManager, inputP1, 1);
     public Player player2 = new Player(this, tileManager, inputP2, 2);
+    public Point playerAverage = new Point(0,0);
 
-    float playerAverageX;
-    float playerAverageY;
     JFrame window;
     CollisionChecker collisionChecker = new CollisionChecker(this);
     public GamePanel(JFrame window){
-        this.setPreferredSize(new Dimension(screenWidth,screenHeight));
+        this.setPreferredSize(new Dimension(SCREENWIDTH,SCREENHEIGHT));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
         this.addKeyListener(inputP1);
@@ -169,8 +84,8 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void checkForEndOfLevel(){
-        distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldPos.x - endGoal[0],2) + Math.pow(player.worldPos.y - endGoal[1],2))) / tileSize);
-        distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldPos.x - endGoal[0],2) + Math.pow(player2.worldPos.y - endGoal[1],2))) / tileSize);
+        int distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldPos.x - endGoal[0],2) + Math.pow(player.worldPos.y - endGoal[1],2))) / TILESIZE);
+        int distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldPos.x - endGoal[0],2) + Math.pow(player2.worldPos.y - endGoal[1],2))) / TILESIZE);
 
         if (distanceToGoalP1 < 1 || distanceToGoalP2 < 1 ){
             System.out.println(distanceToGoalP1 + " " +distanceToGoalP2);
@@ -181,14 +96,88 @@ public class GamePanel extends JPanel implements Runnable{
             playSoundEffect(3);
         }
     }
+    public Button[] setButtons(){
+        return new Button[]{
+                new Button(new Rectangle(125,500,100,100),tileManager.tileImages[3],"1") {
+                    @Override
+                    public void click() {
+                        if(menuState == "MAIN"){
+                            menuState = "GAME";
+                            tileManager.loadLevel("/main/LevelData/1.txt");
+                            player.worldPos = new Point(129,129);
+                            player2.worldPos = new Point(129,129);
+                        }
+                    }
+                },
 
+                new Button(new Rectangle(325, 500, 100, 100),tileManager.tileImages[3],"2") {
+                    @Override
+                    public void click() {
+                        if (menuState == "MAIN"){
+                            menuState = "GAME";
+                            tileManager.loadLevel("/main/LevelData/2.txt");
+                            player.worldPos = new Point(129,512);
+                            player2.worldPos = new Point(129,512);
+                        }
+                    }
+                },
+
+                new Button(new Rectangle(525, 500, 100, 100),tileManager.tileImages[3],"3") {
+                    @Override
+                    public void click() {
+                        if (menuState == "MAIN"){
+                            menuState = "GAME";
+                            System.out.println("click");
+                            tileManager.loadLevel("/main/LevelData/3.txt");
+                            player.worldPos = new Point(129,704);
+                            player2.worldPos = new Point(129,704);
+                        }
+                    }
+                        
+                },
+
+                new Button(new Rectangle(725, 500, 100, 100),tileManager.tileImages[3],"4") {
+                    @Override
+                    public void click() {
+                        if (menuState == "MAIN"){
+                            menuState = "GAME";
+                            tileManager.loadLevel("/main/LevelData/4.txt");
+                            player.worldPos = new Point(129,1088);
+                            player2.worldPos = new Point(129,1088);
+                        }
+                    }
+                },
+
+                new Button(new Rectangle(925, 500, 100, 100),tileManager.tileImages[3],"5") {
+                    @Override
+                    public void click() {
+                        if (menuState == "MAIN"){
+                            menuState = "GAME";
+                            tileManager.loadLevel("/main/LevelData/5.txt");
+                            player.worldPos = new Point(129,1856);
+                            player2.worldPos = new Point(129,1856);
+                        }
+                    }
+                },
+
+                new Button(new Rectangle(925, 650, 200, 100),tileManager.tileImages[3],"Exit") {
+                    @Override
+                    public void click() {
+                        if (menuState == "MAIN"){                    
+                            window.setVisible(false);
+                            window.dispose();
+                            System.exit(0);
+                            
+                        }
+                    }
+                },
+            };
+    }
+    
     public Point getPlayerAverage(){
         //Finds the adverage of players
-        playerAverageX = (player.worldPos.x + player2.worldPos.x + tileSize) / 2;
-        playerAverageY = (player.worldPos.y + player2.worldPos.y + tileSize) / 2;
-
-        return new Point((int)((player.worldPos.x + player2.worldPos.x + tileSize) / 2),
-                         (int)((player.worldPos.y + player2.worldPos.y + tileSize) / 2));
+        return new Point((int)((player.worldPos.x + player2.worldPos.x + TILESIZE) / 2),
+                         (int)((player.worldPos.y + player2.worldPos.y + TILESIZE) / 2));
     }
 
     public void update(){
@@ -200,9 +189,9 @@ public class GamePanel extends JPanel implements Runnable{
 
         }else if (menuState == "GAME"){
             checkForEndOfLevel();
-            getPlayerAverage();
-            player.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
-            player2.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
+            playerAverage = getPlayerAverage();
+            player.update(playerAverage.x, playerAverage.y + CAMERAOFFSETY);
+            player2.update(playerAverage.x, playerAverage.y + CAMERAOFFSETY);
             
         }
     }
@@ -221,7 +210,7 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
         
             default:
-                tileManager.draw(g2, playerAverageX, playerAverageY - CAMERAOFFSETY);
+                tileManager.draw(g2, playerAverage.x, playerAverage.y - CAMERAOFFSETY);
                 player.drawPlayer(g2);
                 player2.drawPlayer(g2);
                 break;

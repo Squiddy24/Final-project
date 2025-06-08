@@ -3,12 +3,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
 
-public class InputHandler implements KeyListener {
+public class InputManager implements KeyListener {
     public boolean up,down,left,right,space;
     public int upKey,downKey,leftKey,rightKey,jumpKey,dashKey;
     public GamePanel panel;
 
-    public InputHandler(int upKey, int downKey, int leftKey, int rightKey, int jumpKey, int dashKey, GamePanel panel){
+    public InputManager(int upKey, int downKey, int leftKey, int rightKey, int jumpKey, int dashKey, GamePanel panel){
         this.upKey = upKey;
         this.downKey = downKey;
         this.leftKey = leftKey;

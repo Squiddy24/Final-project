@@ -22,7 +22,7 @@ public class Player {
     int speed = 4;
 
     GamePanel gamePanel;
-    InputHandler input;
+    InputManager input;
 
     float screenX;
     float screenY;
@@ -35,7 +35,7 @@ public class Player {
     float xVelocity;
     float yVelocity;
 
-    ImageHandler ImageHandler = new ImageHandler();
+    ImageManager ImageHandler = new ImageManager();
     HashMap<String,BufferedImage> playerImages; 
 
     //Gravity
@@ -84,13 +84,13 @@ public class Player {
     int blinkTimer = 240;
     int blinkDuration = 120;
 
-    public Player(GamePanel gamePanel, TileManager tileManager, InputHandler input, int playerNumber){
+    public Player(GamePanel gamePanel, TileManager tileManager, InputManager input, int playerNumber){
         this.playerNumber = playerNumber;
         this.gamePanel = gamePanel;
         this.input = input;
 
-        screenX = gamePanel.screenWidth/2 - (gamePanel.tileSize / 2);
-        screenY = gamePanel.screenHeight/2 - (gamePanel.tileSize / 2);
+        screenX = gamePanel.SCREENWIDTH/2 - (gamePanel.TILESIZE / 2);
+        screenY = gamePanel.SCREENHEIGHT/2 - (gamePanel.TILESIZE / 2);
         hitbox = new Rectangle((int)worldPos.x, (int)worldPos.x, 44, 44);
         getPlayerImages();
     }
@@ -98,8 +98,8 @@ public class Player {
     public void update(float playerAverageX, float playerAverageY){        
 
         //Projects to screenSpace
-        playerScreenX = (int)((worldPos.x + screenX) - playerAverageX + gamePanel.tileSize);
-        playerScreenY = (int)((worldPos.y + screenY) - playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
+        playerScreenX = (int)((worldPos.x + screenX) - playerAverageX + gamePanel.TILESIZE);
+        playerScreenY = (int)((worldPos.y + screenY) - playerAverageY + 4*gamePanel.TILESIZE + gamePanel.TILESIZE/8);
 
         if (currentStunTime > 0){
             currentStunTime -=1;
@@ -114,8 +114,8 @@ public class Player {
         }
         //updateZoom(); //TODO this breaks everyhting
         
-        hitbox.setRect(worldPos.x,worldPos.y,gamePanel.tileSize/2,gamePanel.tileSize/2);
-        int[] trailtPos = {(int)(worldPos.x + 3),(int)(worldPos.y - 1.5*gamePanel.tileSize)};
+        hitbox.setRect(worldPos.x,worldPos.y,gamePanel.TILESIZE/2,gamePanel.TILESIZE/2);
+        int[] trailtPos = {(int)(worldPos.x + 3),(int)(worldPos.y - 1.5*gamePanel.TILESIZE)};
         trail.add(trailtPos);
         if (trail.size() > MAXTRAINLENGTH){
             trail.removeFirst();
@@ -369,17 +369,17 @@ public class Player {
         if(currentStunTime == 0){
             for (int pos = 0; pos < trail.size(); pos++) {
                 g2.setColor(new Color(255,255,255,2*pos));
-                int trailScreenX = (int)((trail.get(pos)[0] + screenX) - gamePanel.playerAverageX + gamePanel.tileSize);
-                int trailScreenY = (int)((trail.get(pos)[1] + screenY) - gamePanel.playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
+                int trailScreenX = (int)((trail.get(pos)[0] + screenX) - gamePanel.playerAverage.x + gamePanel.TILESIZE);
+                int trailScreenY = (int)((trail.get(pos)[1] + screenY) - gamePanel.playerAverage.y + 4*gamePanel.TILESIZE + gamePanel.TILESIZE/8);
 
-                g2.fillRect(trailScreenX, trailScreenY, (int)(gamePanel.tileSize /2.5), (int)(gamePanel.tileSize /2.5));
+                g2.fillRect(trailScreenX, trailScreenY, (int)(gamePanel.TILESIZE /2.5), (int)(gamePanel.TILESIZE /2.5));
             }
         }
         facing = input.directionMap.get("Horizontal") != 0 ? input.directionMap.get("Horizontal") : facing;
         g2.drawImage(animationHandler(), 
-        (int)(facing == 1 ? playerScreenX : playerScreenX + gamePanel.tileSize/2),  //x
+        (int)(facing == 1 ? playerScreenX : playerScreenX + gamePanel.TILESIZE/2),  //x
         (int)playerScreenY, //y
-        (int)(gamePanel.tileSize / 2) * facing, (int)gamePanel.tileSize / 2,null);
+        (int)(gamePanel.TILESIZE / 2) * facing, (int)gamePanel.TILESIZE / 2,null);
 
     }
 }

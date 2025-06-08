@@ -17,7 +17,7 @@ public class MenuManger implements MouseListener {
 
     public void draw(Graphics2D g2, GamePanel gamePanel){
         
-        g2.drawImage(gamePanel.tileManager.tileImages[1], 0,0,gamePanel.screenWidth,gamePanel.screenHeight,null);
+        g2.drawImage(gamePanel.tileManager.tileImages[1], 0,0,gamePanel.SCREENWIDTH,gamePanel.SCREENHEIGHT,null);
         g2.drawImage(gamePanel.tileManager.tileImages[0], 100,-100,124 * 8, 64 * 8,null);
 
         g2.setColor(Color.WHITE);

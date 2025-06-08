@@ -20,7 +20,7 @@ public class CollisionChecker {
         int hitboxRight = (int)player.hitbox.x + player.hitbox.width;
         int hitboxTop = (int)player.hitbox.y;
         int hitboxBottom = (int)player.hitbox.y + player.hitbox.height;
-        zoomFactor = ((gamePanel.tileSize/64)) ;
+        zoomFactor = ((gamePanel.TILESIZE/64)) ;
 
 
         if (gamePanel.tileManager.levelTiles != null){
@@ -46,7 +46,7 @@ public class CollisionChecker {
                                 //Detects hits on the top of a block and moves the player out of it
                                 if (DistBottom < DistLeft && DistBottom < DistRight && DistBottom < DistTop){
                                     //player_hitbox.bottom = block.rect.top + 1;
-                                    player.worldPos.y = (int)Math.ceil((tileTop * zoomFactor) - gamePanel.tileSize + 32);
+                                    player.worldPos.y = (int)Math.ceil((tileTop * zoomFactor) - gamePanel.TILESIZE + 32);
                                     player.accelerationDueToGravity = 0;
                                     player.jumpVelocity = 0;
                                     player.grounded = true;
@@ -67,7 +67,7 @@ public class CollisionChecker {
                                 //Detects hits on the Left of a block and moves the player out of it
                                 else if (DistRight < DistLeft && DistRight < DistTop && DistRight < DistBottom){
                                     //self.player_hitbox.right = block.rect.left;
-                                    player.worldPos.x = (int)Math.ceil((tileLeft * zoomFactor) - gamePanel.tileSize + 32);
+                                    player.worldPos.x = (int)Math.ceil((tileLeft * zoomFactor) - gamePanel.TILESIZE + 32);
                                     player.runSpeed = -player.runSpeed / 3;
 
                                 }

@@ -4,13 +4,9 @@ import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Font;
 
-public class EndScreen {
-    public EndScreen(){
-
-    }
-    
+public class EndScreenManager {
     public void draw(Graphics2D g2, int distanceToGoalP1, int distanceToGoalP2, GamePanel gamePanel){
-        g2.drawImage(gamePanel.tileManager.tileImages[1], 0,0,gamePanel.screenWidth,gamePanel.screenHeight,null);
+        g2.drawImage(gamePanel.tileManager.tileImages[1], 0,0,gamePanel.SCREENWIDTH,gamePanel.SCREENHEIGHT,null);
 
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("STIX Two Math", Font.BOLD, 64));
