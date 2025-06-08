@@ -4,11 +4,105 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable{
+    TileManager tileManager = new TileManager(this);
+    AudioHandler audioHandler = new AudioHandler();
+    EndScreen endScreen = new EndScreen();
+
+    Button[] buttons = {
+        new Button(new Rectangle(125,500,100,100),tileManager.tileImages[3],"1") {
+            @Override
+            public void click() {
+                if(inMenu){
+                    inMenu = false;
+                    tileManager.loadLevel("/main/LevelData/1.txt");
+                    player.worldXPos = 129;
+                    player.worldYPos = 129;
+                    player2.worldXPos = 129;
+                    player2.worldYPos = 129;
+            }
+            }
+        },
+
+        new Button(new Rectangle(325, 500, 100, 100),tileManager.tileImages[3],"2") {
+            @Override
+            public void click() {
+                if (inMenu){
+                    inMenu = false;
+                    tileManager.loadLevel("/main/LevelData/2.txt");
+                    player.worldXPos = 129;
+                    player.worldYPos = 512;
+                    player2.worldXPos = 129;
+                    player2.worldYPos = 512;
+                }
+            }
+        },
+
+        new Button(new Rectangle(525, 500, 100, 100),tileManager.tileImages[3],"3") {
+            @Override
+            public void click() {
+                if (inMenu){
+                    inMenu = false;
+                    System.out.println("click");
+                    tileManager.loadLevel("/main/LevelData/3.txt");
+                    player.worldXPos = 129;
+                    player.worldYPos = 704;
+                    player2.worldXPos = 129;
+                    player2.worldYPos = 704;
+                }
+            }
+                
+        },
+
+        new Button(new Rectangle(725, 500, 100, 100),tileManager.tileImages[3],"4") {
+            @Override
+            public void click() {
+                if (inMenu){
+                    inMenu = false;
+                    tileManager.loadLevel("/main/LevelData/4.txt");
+                    player.worldXPos = 129;
+                    player.worldYPos = 1088;
+                    player2.worldXPos = 129;
+                    player2.worldYPos = 1088;
+                }
+            }
+        },
+
+        new Button(new Rectangle(925, 500, 100, 100),tileManager.tileImages[3],"5") {
+            @Override
+            public void click() {
+                if (inMenu){
+                    inMenu = false;
+                    tileManager.loadLevel("/main/LevelData/5.txt");
+                    player.worldXPos = 129;
+                    player.worldYPos = 1856;
+                    player2.worldXPos = 129;
+                    player2.worldYPos = 1856;
+                }
+            }
+        },
+
+        new Button(new Rectangle(925, 650, 200, 100),tileManager.tileImages[3],"Exit") {
+            @Override
+            public void click() {
+                if (inMenu){                    
+                    window.setVisible(false);
+                    window.dispose();
+                    System.exit(0);
+                    
+                }
+            }
+        },
+    };
+
+
+    MenuManger menu = new MenuManger(buttons);
 
     public final int defaultWidth = 9;
     public final int defaultHeight = 6;
@@ -18,7 +112,12 @@ public class GamePanel extends JPanel implements Runnable{
 
     int[] endGoal = {0,0};
     int FPS = 120;
-
+    int distanceToGoalP1= 100;
+    int distanceToGoalP2=100;
+    boolean inMenu = true;
+    boolean inEndScreen;
+    int endScreenTimerCurrent;
+    final int ENDSCREENTIMERMAX = 120;
     float spriteScale = 2;
     float tileSize = screenWidth / (defaultWidth * spriteScale); // 64
     float oldTileSize;
@@ -32,24 +131,25 @@ public class GamePanel extends JPanel implements Runnable{
 
     Thread gameThread;
 
-    TileManager tileManager = new TileManager(this);
-
-    public Player player = new Player(0,0,this, tileManager, inputP1, 1);
-    public Player player2 = new Player(0, 0,this, tileManager, inputP2, 2);
+    public Player player = new Player(100,100,this, tileManager, inputP1, 1);
+    public Player player2 = new Player(100, 100,this, tileManager, inputP2, 2);
 
     Player[] players = {player ,player2};
 
     float playerAverageX;
     float playerAverageY;
-        
+    JFrame window;
     CollisionChecker collisionChecker = new CollisionChecker(this);
-    public GamePanel(){
+    public GamePanel(JFrame window){
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
         this.addKeyListener(inputP1);
         this.addKeyListener(inputP2);
+        this.addMouseListener(menu);
         this.setFocusable(true);
+        this.window = window;
+        playMusic(0);
     }
 
     public void initializeGameThread(){
@@ -80,67 +180,73 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void update(){
+        if (inMenu){
+            menu.update();
+        }else if (inEndScreen){
+            if (endScreenTimerCurrent <= 0) {
+                inEndScreen = false;
+                inMenu = true;
+            }
+            endScreenTimerCurrent -= 1;
+        }else{
+            distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldXPos - endGoal[0],2) + Math.pow(player.worldYPos - endGoal[1],2))) / tileSize);
+            distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldXPos - endGoal[0],2) + Math.pow(player2.worldYPos - endGoal[1],2))) / tileSize);
 
-        int distanceToGoal = (int)((Math.sqrt(Math.pow(player.worldXPos - endGoal[0],2) + Math.pow(player.worldYPos - endGoal[1],2))) / tileSize);
-        //System.out.println( distanceToGoal); //TODO
-        //Finds the adverage of players
-        playerAverageX = tileSize;
-        playerAverageY = tileSize;
+            if (distanceToGoalP1 < 1 || distanceToGoalP2 < 1 ){
+                System.out.println(distanceToGoalP1 + " " +distanceToGoalP2);
+                inEndScreen = true;
+                endScreenTimerCurrent = ENDSCREENTIMERMAX;
+                player = new Player(0,0,this, tileManager, inputP1, 1);
+                player2 = new Player(0, 0,this, tileManager, inputP2, 2);
+                players = new Player[]{player ,player2};
+                playSoundEffect(3);
+            }
+            //Finds the adverage of players
+            playerAverageX = tileSize;
+            playerAverageY = tileSize;
 
-        for (Player player : players) {
-           playerAverageX += player.worldXPos;
-           playerAverageY += player.worldYPos;
+            for (Player player : players) {
+            playerAverageX += player.worldXPos;
+            playerAverageY += player.worldYPos;
+            }
+
+            playerAverageX /= players.length;
+            playerAverageY /= players.length;
+
+            player.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
+            player2.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
         }
-
-        playerAverageX /= players.length;
-        playerAverageY /= players.length;
-
-        player.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
-        player2.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
-
-
-    }
-
-
-    public void zoom(float zoomFactor){
-        oldTileSize = tileSize;
-        spriteScale += zoomFactor;
-        tileSize = screenWidth / (defaultWidth * spriteScale);
-
-        ratio = (double)tileSize/oldTileSize;
-        //cumulativeRatio *= ratio;
-
-        //TODO
-        player.worldXPos *= ratio;
-        player.worldYPos *= ratio;
-        player2.worldXPos *= ratio;
-        player2.worldYPos *= ratio;
-
     }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        if (inMenu){
+            menu.draw(g2,this);
+        }else if (inEndScreen){
+            endScreen.draw(g2, distanceToGoalP1, distanceToGoalP2, this);
+        }else{
+            tileManager.draw(g2, playerAverageX, playerAverageY - CAMERAOFFSETY);
+            player.drawPlayer(g2);
+            player2.drawPlayer(g2);
+        }
 
-        tileManager.draw(g2, playerAverageX, playerAverageY - CAMERAOFFSETY);
-        //g2.setColor(Color.RED);
-
-        player.drawPlayer(g2);
-        //g2.setColor(Color.BLUE);
-
-        player2.drawPlayer(g2);
-        //g2.setColor(Color.GREEN);
-
-
-        //TODO DEBUG
-        // for (int i = 0; i < collisionChecker.levelTiles[0].length; i++) {
-        //     for (int j = 0; j < collisionChecker.levelTiles.length; j++) {
-        //         if (collisionChecker.levelTiles[j][i].collision == true){
-        //         g2.drawRect((int)collisionChecker.levelTiles[j][i].pos[0], (int)collisionChecker.levelTiles[j][i].pos[1], 64, 64);
-        //         }
-        //     }
-        // }
         g2.dispose(); //removes stored data
+    }
+
+    public void playMusic(int i){
+        audioHandler.SetFile(i);
+        audioHandler.play();
+        audioHandler.loop();
+    }
+
+    public void stopMusic(){
+        audioHandler.stop();
+    }
+
+    public void playSoundEffect(int i){
+        audioHandler.SetFile(i);
+        audioHandler.play();
     }
 
 }

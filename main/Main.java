@@ -9,7 +9,7 @@ public class Main{
         window.setResizable(false);
         window.setTitle("Higher Velocity Hijinks");
 
-        GamePanel gamePanel = new GamePanel();
+        GamePanel gamePanel = new GamePanel(window);
         window.add(gamePanel);
         window.pack();
 

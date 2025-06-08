@@ -125,30 +125,7 @@ public class Player {
         }
 
 
-        gamePanel.collisionChecker.checkTile(this, gamePanel);
-    }
-
-    public void updateZoom(){
-        float dynamicZoom;
-
-        //Zoom padding
-        if (playerScreenX > gamePanel.screenWidth - zoomPadding || playerScreenX < zoomPadding){
-            dynamicZoom = (float)(-1/Math.ceil(((playerScreenX-gamePanel.screenWidth)*3))) * gamePanel.spriteScale;
-            if (dynamicZoom > 0.003){ //stops stutter as zoom comes to an end
-                gamePanel.zoom(dynamicZoom);
-            }
-        }else if (gamePanel.spriteScale > 2){
-            gamePanel.zoom((float)(1/Math.ceil(((playerScreenX-gamePanel.screenWidth)*3))) * gamePanel.spriteScale);
-        }
-        
-        if(playerScreenY > gamePanel.screenHeight - zoomPadding || playerScreenY < zoomPadding){
-            dynamicZoom = (float)(-1/Math.ceil(((playerScreenY-gamePanel.screenHeight))*3)) * gamePanel.spriteScale;
-            if (dynamicZoom > 0.006){ //stops stutter as zoom comes to an end
-                gamePanel.zoom(dynamicZoom);
-            } 
-        }else if (gamePanel.spriteScale > 2){
-            gamePanel.zoom((float)(1/Math.ceil(((playerScreenY-gamePanel.screenHeight))*3)) * gamePanel.spriteScale);
-        }
+        gamePanel.collisionChecker.checkTile(this, gamePanel); //TODO
     }
 
     public void applyGravity(){
@@ -212,6 +189,7 @@ public class Player {
             canDash = false;
             jumping = false;
             currentDashTime = MAXDASHTIME;
+            gamePanel.playSoundEffect(1);
         }
 
         if (dashing){
@@ -391,14 +369,6 @@ public class Player {
 
     public void drawPlayer(Graphics2D g2){ 
         
-        // for (int[] pos : trail) {
-        //     g2.setColor(new Color(255,255,255,10));
-        //     int trailScreenX = (int)((pos[0] + screenX) - gamePanel.playerAverageX + gamePanel.tileSize);
-        //     int trailScreenY = (int)((pos[1] + screenY) - gamePanel.playerAverageY + 4*gamePanel.tileSize + gamePanel.tileSize/8);
-
-        //     g2.fillRect(trailScreenX, trailScreenY, (int)(gamePanel.tileSize /2.5), (int)(gamePanel.tileSize /2.5));
-        // }
-
         if(currentStunTime == 0){
             for (int pos = 0; pos < trail.size(); pos++) {
                 g2.setColor(new Color(255,255,255,2*pos));
@@ -413,10 +383,6 @@ public class Player {
         (int)(facing == 1 ? playerScreenX : playerScreenX + gamePanel.tileSize/2),  //x
         (int)playerScreenY, //y
         (int)(gamePanel.tileSize / 2) * facing, (int)gamePanel.tileSize / 2,null);
-        
-        //g2.drawRect(hitbox.x,hitbox.y,hitbox.width,hitbox.height);
-        //g2.setColor(Color.GREEN);
-
 
     }
 }

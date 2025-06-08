@@ -3,7 +3,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
 
-public class InputHandler implements KeyListener{
+public class InputHandler implements KeyListener {
     public boolean up,down,left,right,space;
     public int upKey,downKey,leftKey,rightKey,jumpKey,dashKey;
     public GamePanel panel;
