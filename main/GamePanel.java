@@ -125,8 +125,6 @@ public class GamePanel extends JPanel implements Runnable{
     public Player player = new Player(this, tileManager, inputP1, 1);
     public Player player2 = new Player(this, tileManager, inputP2, 2);
 
-    Player[] players = {player ,player2};
-
     float playerAverageX;
     float playerAverageY;
     JFrame window;
@@ -170,6 +168,29 @@ public class GamePanel extends JPanel implements Runnable{
         }
     }
 
+    public void checkForEndOfLevel(){
+        distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldPos.x - endGoal[0],2) + Math.pow(player.worldPos.y - endGoal[1],2))) / tileSize);
+        distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldPos.x - endGoal[0],2) + Math.pow(player2.worldPos.y - endGoal[1],2))) / tileSize);
+
+        if (distanceToGoalP1 < 1 || distanceToGoalP2 < 1 ){
+            System.out.println(distanceToGoalP1 + " " +distanceToGoalP2);
+            menuState = "END";
+            endScreenTimerCurrent = ENDSCREENTIMERMAX;
+            player = new Player(this, tileManager, inputP1, 1);
+            player2 = new Player(this, tileManager, inputP2, 2);
+            playSoundEffect(3);
+        }
+    }
+
+    public Point getPlayerAverage(){
+        //Finds the adverage of players
+        playerAverageX = (player.worldPos.x + player2.worldPos.x + tileSize) / 2;
+        playerAverageY = (player.worldPos.y + player2.worldPos.y + tileSize) / 2;
+
+        return new Point((int)((player.worldPos.x + player2.worldPos.x + tileSize) / 2),
+                         (int)((player.worldPos.y + player2.worldPos.y + tileSize) / 2));
+    }
+
     public void update(){
         if (menuState == "END"){
             if (endScreenTimerCurrent <= 0) {
@@ -178,38 +199,18 @@ public class GamePanel extends JPanel implements Runnable{
             endScreenTimerCurrent -= 1;
 
         }else if (menuState == "GAME"){
-            distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player.worldPos.x - endGoal[0],2) + Math.pow(player.worldPos.y - endGoal[1],2))) / tileSize);
-            distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldPos.x - endGoal[0],2) + Math.pow(player2.worldPos.y - endGoal[1],2))) / tileSize);
-
-            if (distanceToGoalP1 < 1 || distanceToGoalP2 < 1 ){
-                System.out.println(distanceToGoalP1 + " " +distanceToGoalP2);
-                menuState = "END";
-                endScreenTimerCurrent = ENDSCREENTIMERMAX;
-                player = new Player(this, tileManager, inputP1, 1);
-                player2 = new Player(this, tileManager, inputP2, 2);
-                players = new Player[]{player ,player2};
-                playSoundEffect(3);
-            }
-            //Finds the adverage of players
-            playerAverageX = tileSize;
-            playerAverageY = tileSize;
-
-            for (Player player : players) {
-            playerAverageX += player.worldPos.x;
-            playerAverageY += player.worldPos.y;
-            }
-
-            playerAverageX /= players.length;
-            playerAverageY /= players.length;
-
+            checkForEndOfLevel();
+            getPlayerAverage();
             player.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
             player2.update(playerAverageX, playerAverageY + CAMERAOFFSETY);
+            
         }
     }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+
         switch (menuState) {
             case "MAIN":
                 menu.draw(g2,this);
