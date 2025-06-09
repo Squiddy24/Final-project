@@ -1,18 +1,18 @@
 package main;
 
+//Imports needed for class
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-
 import javax.imageio.ImageIO;
 
 public class ImageManager {
-    public ImageManager(){
-
-    }
 
     public HashMap<String,BufferedImage> player1Images(){
+
+        //Creates a hashmap to store player 1 images
         HashMap<String,BufferedImage> P1Images = new HashMap<String,BufferedImage>();
 
+        //All images required for player 2
         try {
             P1Images.put("Base", ImageIO.read(getClass().getResourceAsStream("/main/Images/PlayerSprites/BaseP1.png")));
             P1Images.put("Blink", ImageIO.read(getClass().getResourceAsStream("/main/Images/PlayerSprites/BlinkP1.png")));
@@ -24,15 +24,19 @@ public class ImageManager {
             P1Images.put("NDDeath", ImageIO.read(getClass().getResourceAsStream("/main/Images/PlayerSprites/NDDeadP1.png")));
 
         } catch (Exception e) {
-            System.out.println("Error Loading Images");
+            System.out.println("Error Loading Images"); //Displays an error if an image cant be loaded
         }
         
+        //returns the image set
         return P1Images;
     }
 
     public HashMap<String,BufferedImage> player2Images(){
+
+        //Creates a hashmap to store player 2 images
         HashMap<String,BufferedImage> P1Images = new HashMap<String,BufferedImage>();
 
+        //All images required for player 2
         try {
             P1Images.put("Base", ImageIO.read(getClass().getResourceAsStream("/main/Images/PlayerSprites/BaseP2.png")));
             P1Images.put("Blink", ImageIO.read(getClass().getResourceAsStream("/main/Images/PlayerSprites/BlinkP2.png")));
@@ -44,9 +48,10 @@ public class ImageManager {
             P1Images.put("NDDeath", ImageIO.read(getClass().getResourceAsStream("/main/Images/PlayerSprites/NDDeadP2.png")));
 
         } catch (Exception e) {
-            System.out.println("Error Loading Images");
+            System.out.println("Error Loading Images"); //Displays an error if an image cant be loaded
         }
         
+        //returns the image set
         return P1Images;
     }
 }

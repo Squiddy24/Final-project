@@ -1,4 +1,6 @@
 package main;
+
+//Imports needed for class
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -10,97 +12,130 @@ import java.util.LinkedList;
 
 public class Player {
 
+    //Trail
     LinkedList<int[]> trail = new LinkedList<>();
     final int MAXTRAINLENGTH = 30;
 
-    int playerNumber;
+    //Position of player
+    public Point worldPos = new Point(100,100); //Players position in the world
+    private Point screenPos = new Point(); //Players position on the screen
 
-    public final int zoomPadding = 200;
-
-    Point worldPos = new Point(100,100);
-
-    int speed = 4;
-
+    //Game panel and input manager
     GamePanel gamePanel;
     InputManager input;
 
-    float screenX;
-    float screenY;
-
-    int playerScreenX;
-    int playerScreenY;
-    int facing = 1;
-    boolean collided = false;
-
-    float xVelocity;
-    float yVelocity;
-
+    //Images
     ImageManager ImageHandler = new ImageManager();
     HashMap<String,BufferedImage> playerImages; 
 
+    //The diraction the player is facing
+    int facing = 1;
+
+    //The velocity of the player
+    public Point velocity;
+
     //Gravity
-    float accelerationDueToGravity;
     final float GRAVITY = 0.1f;
     final float TERMINALVELOCITY = 5;
+    public float accelerationDueToGravity; //current acceleration
+
 
     //Jump Stuff
-    final int jumpPower = 6;
-    final int KYODIETIME = 30;
-    final int maxJumpLength = 30; //frames
-    float jumpVelocity;
-    float currentJumpTime = 0;
-    boolean jumping;
-    boolean canJump;
-    boolean grounded = true;
-    int currentKyodieTime = 0;
+    private final int JUMPPOWER = 6;
+    private final int KYODIETIME = 30;
+    private final int MAXJUMPLENGTH = 30;
+    public float jumpVelocity;
+    public float currentJumpTime = 0;
+    public boolean jumping;
+    private boolean canJump;
+    public boolean grounded = true;
+    private int currentKyodieTime = 0; //Time a play can run off a tile before they are no longer able to jump
 
-    //Run
-    float runSpeed = 0;
-    final float maxRunspeed = 5;
-    final float RUNACCELERATION = 0.05f;
-    final float RUNDECELERATION = 0.2f;
+    //Runing
+    private final float MAXRUNSPEED = 5;
+    private final float RUNACCELERATION = 0.05f;
+    private final float RUNDECELERATION = 0.2f;
+    public float runSpeed = 0; //Current running speed
 
     //Dashing
-    int lastDirection = 1;
-    boolean canDash = true;
-    boolean dashing;
-    int currentDashTime;
-    int currentDashCooldown;
     final int MAXDASHTIME = 30;
     final int DASHCOOLDOWN = 40;
     final float DASHPOWER = 7;
-    float xCarryoverMomentum = 0;
-    float yCarryoverMomentum = 0;
+    private int lastDirection = 1; //Last direction the player was pressing 1-8
+    private boolean dashing;
+    private int currentDashTime;
+    private int currentDashCooldown;
+    public boolean canDash = true;
+    private float xCarryoverMomentum = 0;// X momentum carryed over from a dash
+    private float yCarryoverMomentum = 0;// Y momentum carryed over from a dash
 
-    final int STUNDURATION = 60;
-    final int IMMUNITYDURATION = 240;
-    int currentStunTime = 0;
-    int stunImmunity = 120;
+    //Stun
+    public final int STUNDURATION = 60;
+    private final int IMMUNITYDURATION = 240; // The duration in which a player cannot be damaged again
+    public int currentStunTime = 0;
+    public int stunImmunity = 120;
 
-    //Rectangle hitbox = new Rectangle(6 * gamePanel.spriteScale, 12 * gamePanel.spriteScale, 20 * gamePanel.spriteScale, 20 * gamePanel.spriteScale);
+    //The part of the player that interacts with objects
     Rectangle hitbox;
 
-    //animation stuff to clean up TODO
+    //Animation timer
     int blinkTimer = 240;
     int blinkDuration = 120;
 
-    public Player(GamePanel gamePanel, TileManager tileManager, InputManager input, int playerNumber){
-        this.playerNumber = playerNumber;
+    public Player(GamePanel gamePanel, InputManager input, int playerNumber){
         this.gamePanel = gamePanel;
         this.input = input;
 
-        screenX = gamePanel.SCREENWIDTH/2 - (gamePanel.TILESIZE / 2);
-        screenY = gamePanel.SCREENHEIGHT/2 - (gamePanel.TILESIZE / 2);
+        //Initializes the hitbox
         hitbox = new Rectangle((int)worldPos.x, (int)worldPos.x, 44, 44);
-        getPlayerImages();
+
+        //Initializes the images
+        playerImages = getPlayerImages(playerNumber);
     }
 
+    //Updates the players trail
+    private void updateTrail(){
+        //Adds the current possition to the trail list
+        int[] trailtPos = {(int)(worldPos.x + 3),(int)(worldPos.y - 1.5*gamePanel.TILESIZE)};
+        trail.add(trailtPos);
+
+        //If the trail exeeds the max trail length remove the first element
+        if (trail.size() > MAXTRAINLENGTH){
+            trail.removeFirst();
+        }
+        
+    }
+
+    //Renders the players trail
+    private void renderTrail(Graphics2D g2){
+
+        //If the player is not being stunned
+        if(currentStunTime == 0){
+
+            //Loops over each position in the trail
+            for (int pos = 0; pos < trail.size(); pos++) {
+
+                //Change alpha based on position in trail (fade out) 
+                g2.setColor(new Color(255,255,255,2*pos));
+
+                //Project to screen space
+                int trailScreenX = (int)((trail.get(pos)[0] + 544) - gamePanel.playerAverage.x + gamePanel.TILESIZE);
+                int trailScreenY = (int)((trail.get(pos)[1] + 352) - gamePanel.playerAverage.y + 4*gamePanel.TILESIZE + gamePanel.TILESIZE/8);
+
+                //Draw to screen space
+                g2.fillRect(trailScreenX, trailScreenY, (int)(gamePanel.TILESIZE /2.5), (int)(gamePanel.TILESIZE /2.5));
+            }
+        }
+    }
+
+    //Updates the player
     public void update(float playerAverageX, float playerAverageY){        
 
         //Projects to screenSpace
-        playerScreenX = (int)((worldPos.x + screenX) - playerAverageX + gamePanel.TILESIZE);
-        playerScreenY = (int)((worldPos.y + screenY) - playerAverageY + 4*gamePanel.TILESIZE + gamePanel.TILESIZE/8);
+        screenPos.x = (int)((worldPos.x + 544) - playerAverageX + gamePanel.TILESIZE);
+        screenPos.y = (int)((worldPos.y + 352) - playerAverageY + 4*gamePanel.TILESIZE + gamePanel.TILESIZE/8);
 
+        //Updates stun 
         if (currentStunTime > 0){
             currentStunTime -=1;
             if (currentStunTime == 0){
@@ -110,53 +145,71 @@ public class Player {
             if (stunImmunity > 0){
                 stunImmunity -=1;
             }
-            applyForces(); 
+            applyForces(); //applys the forces
         }
-        //updateZoom(); //TODO this breaks everyhting
         
+        //Updates the hitbos
         hitbox.setRect(worldPos.x,worldPos.y,gamePanel.TILESIZE/2,gamePanel.TILESIZE/2);
-        int[] trailtPos = {(int)(worldPos.x + 3),(int)(worldPos.y - 1.5*gamePanel.TILESIZE)};
-        trail.add(trailtPos);
-        if (trail.size() > MAXTRAINLENGTH){
-            trail.removeFirst();
-        }
 
+        //Render the trail
+        updateTrail();
 
-        gamePanel.collisionChecker.checkTile(this, gamePanel); //TODO
+        //Check for collision
+        gamePanel.collisionChecker.checkTile(this, gamePanel);
     }
 
-    public void applyGravity(){
+    //Applys gravity
+    private void applyGravity(){
+        //If the player has not exeeded terminal velocity add acceleration
         if (accelerationDueToGravity < TERMINALVELOCITY){
             accelerationDueToGravity += GRAVITY;
         }
-        yVelocity += accelerationDueToGravity;
+
+        //Apply velocity
+        velocity.y += accelerationDueToGravity;
     }
 
-    public void applyForces(){
-        xVelocity = 0;
-        yVelocity = 0;
+    //applys forces to the player
+    private void applyForces(){
+        //Resets this frames velocity
+        velocity = new Point();
+
+        //If the player is not dashing
         if (!dashing){
+            //update last direction
             lastDirection = dashDirection();
+
+            //Apply gravity
             applyGravity();
+
+            //Apply horizontal movment
             horizontalMovment();
+
+            //Apply jump forces
             jump();
         }
 
+        //Apply dash forces
         dash();
 
 
-        worldPos.x += xVelocity;
-        worldPos.y += yVelocity + jumpVelocity;
+        //Update player position
+        worldPos.x += velocity.x;
+        worldPos.y += velocity.y + jumpVelocity;
     }
 
-    public int dashDirection(){
+    //Finds the direction the player is dashing in
+    private int dashDirection(){
+        //Direction player is dashing (1-8)
         int direction;
 
+        //Gets currently pressed keys
         boolean up = input.keyMap.get("Up");
         boolean down = input.keyMap.get("Down");
         boolean left = input.keyMap.get("Left");
         boolean right = input.keyMap.get("Right");
 
+        //Sets direction (1-8) starting upwards and moving clockwise by 45 degrees
         direction = 
         (!up  && !down && !left && !right) ? lastDirection : //Last
         (up  && !down && !left && !right) ? 1 :  //Up
@@ -169,43 +222,60 @@ public class Player {
         (up  && !down && left  && !right) ? 8 :  //Up-Left
         2;                                       //More than 2 (Up-Right defult)
 
+        //Returns direction
         return direction;
         
     }
 
+    //Applies dash forces
     public void dash(){
+        //Reduces dath cooldown
         currentDashCooldown -=1;
 
         //Start Dash
         if (input.keyMap.get("Dash") && !dashing && currentDashCooldown < 0 && canDash){
+            //Resets velocities
             runSpeed = 0;
-            dashing = true;
             accelerationDueToGravity = 0;
             jumpVelocity = 0;
             currentJumpTime = 0;
+
+            //Sets booleans
+            dashing = true;
             canDash = false;
             jumping = false;
+
+            //Starts dash timer
             currentDashTime = MAXDASHTIME;
+
+            //Plays sound effect
             gamePanel.playSoundEffect(1);
         }
 
+        //During Dash
         if (dashing){
+            //Reduces dash timer
             currentDashTime -= 1;
+
+            //Creates Dash velocities
             float dashVelocityVertical = 0;
             float dashVelocityHorizontal = 0;
 
+            //Sets dash velocities
             switch (lastDirection) {
                 case 1:      
                     dashVelocityVertical = -DASHPOWER;
                     break;
                 case 2: 
+                    //Trig is used to keep the velocity bound to a circle
                     dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(45)));
                     dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(45)));
                     break;
                 case 3:
                     dashVelocityHorizontal = DASHPOWER;        
                     break;
-                case 4:   
+                case 4:
+                    //Trig is used to keep the velocity bound to a circle 
                     dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(315)));
                     dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(315)));     
                     break;
@@ -213,13 +283,15 @@ public class Player {
                     dashVelocityVertical = DASHPOWER;
                     break;
                 case 6:      
+                    //Trig is used to keep the velocity bound to a circle
                     dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(225)));
                     dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(225)));    
                     break;
                 case 7: 
                     dashVelocityHorizontal = -DASHPOWER;         
                     break;  
-                case 8:      
+                case 8:
+                    //Trig is used to keep the velocity bound to a circle 
                     dashVelocityHorizontal = (float)(DASHPOWER * Math.cos(Math.toRadians(135)));
                     dashVelocityVertical = (float)(DASHPOWER * -Math.sin(Math.toRadians(135)));      
                     break;  
@@ -227,74 +299,71 @@ public class Player {
                     break;
             }
 
-            xVelocity = dashVelocityHorizontal;
-            yVelocity = dashVelocityVertical;
+            //Applies dash velocities to total velocity
+            velocity.x = (int)dashVelocityHorizontal;
+            velocity.y = (int)dashVelocityVertical;
 
             //End Dash
             if (currentDashTime <= 0){
+                //Ends dashing
                 dashing = false;
                 currentDashCooldown = DASHCOOLDOWN;
 
-
-                if (lastDirection == 2 || lastDirection == 3 || lastDirection == 4){ //Right
-                    xCarryoverMomentum = dashVelocityHorizontal/2;
-                }
-                if (lastDirection == 6 || lastDirection == 7 || lastDirection == 8){ //Left
-                    xCarryoverMomentum = dashVelocityHorizontal/2;
-                }
-                if (lastDirection == 4 || lastDirection == 5 || lastDirection == 6){ //Down
-                    yCarryoverMomentum = dashVelocityVertical / 2;
-                }
-                if (lastDirection == 1 || lastDirection == 2 || lastDirection == 8){ //Up
-                    yCarryoverMomentum = dashVelocityVertical / 2;
-                }
-
+                //Give a carry over force based on the direction dashed
+                if (lastDirection == 1 || lastDirection == 2 || lastDirection == 8){yCarryoverMomentum = dashVelocityVertical / 2;} //Up
+                if (lastDirection == 4 || lastDirection == 5 || lastDirection == 6){yCarryoverMomentum = dashVelocityVertical / 2;} //Down
+                if (lastDirection == 6 || lastDirection == 7 || lastDirection == 8){xCarryoverMomentum = dashVelocityHorizontal/2;} //Left
+                if (lastDirection == 2 || lastDirection == 3 || lastDirection == 4){xCarryoverMomentum = dashVelocityHorizontal/2;} //Right
             }
         }
 
-        xVelocity += xCarryoverMomentum;
-        yVelocity += yCarryoverMomentum;
+        //Applies carryover momentum to velocity
+        velocity.x += xCarryoverMomentum;
+        velocity.y += yCarryoverMomentum;
         
-        if (xCarryoverMomentum > 0){
-            xCarryoverMomentum = Math.max(xCarryoverMomentum - 0.03f, 0);
-        }else{
-            xCarryoverMomentum = Math.min(xCarryoverMomentum + 0.03f, 0);
-        }
+        //Decreeses carryover momentum on the x axis
+        if (xCarryoverMomentum > 0){xCarryoverMomentum = Math.max(xCarryoverMomentum - 0.03f, 0);
+        }else{xCarryoverMomentum = Math.min(xCarryoverMomentum + 0.03f, 0);}
 
-        if (yCarryoverMomentum > 0){
-            yCarryoverMomentum = Math.max(yCarryoverMomentum - 0.03f, 0);
-        }else{
-            yCarryoverMomentum = Math.min(yCarryoverMomentum + 0.03f, 0);
-        }
+        //Decreeses carryover momentum on the y axis
+        if (yCarryoverMomentum > 0){yCarryoverMomentum = Math.max(yCarryoverMomentum - 0.03f, 0);
+        }else{yCarryoverMomentum = Math.min(yCarryoverMomentum + 0.03f, 0);}
     }
 
+    //Applies horrizontal velocity
     public void horizontalMovment(){
-        //Horizontal movement
+        //Sets horizontal acceleration
         if (input.directionMap.get("Horizontal") != 0) {
-            //runSpeed = Math.min(runSpeed + RUNACCELERATION * input.directionMap.get("Horizontal"), maxRunspeed);
-            runSpeed = input.directionMap.get("Horizontal") == 1 ? Math.min(runSpeed + RUNACCELERATION, maxRunspeed) : Math.max(runSpeed - RUNACCELERATION, -maxRunspeed);
+            runSpeed = input.directionMap.get("Horizontal") == 1 ? Math.min(runSpeed + RUNACCELERATION, MAXRUNSPEED) : Math.max(runSpeed - RUNACCELERATION, -MAXRUNSPEED);
         }else{
             runSpeed = runSpeed > 0 ? Math.max(runSpeed - RUNDECELERATION, 0) : Math.min(runSpeed + RUNDECELERATION, 0);
         }
-                
-        xVelocity += runSpeed;
+        
+        //Applies horizontal velocity
+        velocity.x += runSpeed;
     }
 
+    //Applies jump velocity
     public void jump(){
-        if (grounded){
-            currentKyodieTime = KYODIETIME;
-        }
+        //If the player is on the ground reset kyodie time
+        if (grounded){currentKyodieTime = KYODIETIME;}
 
+        //The player can jump if they still have kyodie time and are not currently jumping
         canJump = (currentKyodieTime > 0) && !jumping;
     
+        //If the player presses the jump key and can jump
         if (input.keyMap.get("Jump") && canJump){
+            //Start jump
             jumping = true;
             currentKyodieTime = 0;
             accelerationDueToGravity = 0;
 
         }
+
+        //If the player is currently jumping
         if (jumping){
-            if (!input.keyMap.get("Jump")){ //Early Terminate jump
+            //If the player stops pressing jump terminate the jump earlt
+            if (!input.keyMap.get("Jump")){
                 jumping = false;
                 jumpVelocity = 0;
                 currentJumpTime = 0;
@@ -302,35 +371,56 @@ public class Player {
 
             }
 
+            //Increment jump timer
             currentJumpTime += 1;
 
-            if (currentJumpTime < maxJumpLength){
-                jumpVelocity = -jumpPower;
-
+            //If the jump timer has not reached its max
+            if (currentJumpTime < MAXJUMPLENGTH){
+                //Apply jump force
+                jumpVelocity = -JUMPPOWER;
             }else{
+                //End the jump
                 jumping = false;
                 currentJumpTime = 0;
             }
+        //If the player is not jumping
         }else{
+            //Apply falloff jumping velocity
             jumpVelocity = Math.min(jumpVelocity += 0.1, 0);
         }
 
+        //Decrement jump timer
         currentKyodieTime -=1;
+
+        //Reset grounded check
         grounded = false;
     }
 
-    public void getPlayerImages(){
-        playerImages = playerNumber == 1 ? ImageHandler.player1Images() : ImageHandler.player2Images();
+    //Gets player images based off of the idNumber
+    private HashMap<String,BufferedImage> getPlayerImages(int idNum){
+        HashMap<String,BufferedImage> imgSet = idNum == 1 ? ImageHandler.player1Images() : ImageHandler.player2Images();
+        return imgSet;
     }
 
+    //Sets the players image to the correct animation
     public BufferedImage animationHandler(){
+        //Decrement blink timer
         blinkTimer -=1;
+
+        //If the plater is in a stun flicker the player
         if ((currentStunTime > 20 || currentStunTime < 10) && currentStunTime > 0){return playerImages.get(null);}
+
+        //If the player cant dash 
         if (!canDash){
+
+            //If the player is being hit
             if (currentStunTime <= 0){
+
+                //If the player is dashing
                 if(dashing){
                     return playerImages.get("NDDash");
                 }else if (blinkDuration > 0 && blinkTimer < 0){
+                    //Animate blink
                     blinkDuration -= 1;
                     if (blinkDuration == 0){
                         blinkTimer = 240;
@@ -344,11 +434,18 @@ public class Player {
             }else{
                 return playerImages.get("NDDeath");
             }
+
+        //If the player can dash
         }else{
+
+            //If the player is being hit
             if (currentStunTime <= 0){
+
+                //If the player is dashing
                 if(dashing){
                     return playerImages.get("Dash");
                 }else if (blinkDuration > 0 && blinkTimer < 0){
+                    //Animate blink
                     blinkDuration -= 1;
                     if (blinkDuration == 0){
                         blinkTimer = 240;
@@ -364,21 +461,19 @@ public class Player {
         }
     }
 
+    //Draws the player
     public void drawPlayer(Graphics2D g2){ 
         
-        if(currentStunTime == 0){
-            for (int pos = 0; pos < trail.size(); pos++) {
-                g2.setColor(new Color(255,255,255,2*pos));
-                int trailScreenX = (int)((trail.get(pos)[0] + screenX) - gamePanel.playerAverage.x + gamePanel.TILESIZE);
-                int trailScreenY = (int)((trail.get(pos)[1] + screenY) - gamePanel.playerAverage.y + 4*gamePanel.TILESIZE + gamePanel.TILESIZE/8);
+        //Render the trail
+        renderTrail(g2);
 
-                g2.fillRect(trailScreenX, trailScreenY, (int)(gamePanel.TILESIZE /2.5), (int)(gamePanel.TILESIZE /2.5));
-            }
-        }
+        //Update the direction the player is facing
         facing = input.directionMap.get("Horizontal") != 0 ? input.directionMap.get("Horizontal") : facing;
+        
+        //Draw the player
         g2.drawImage(animationHandler(), 
-        (int)(facing == 1 ? playerScreenX : playerScreenX + gamePanel.TILESIZE/2),  //x
-        (int)playerScreenY, //y
+        (int)(facing == 1 ? screenPos.x : screenPos.x + gamePanel.TILESIZE/2),  //x
+        (int)screenPos.y, //y
         (int)(gamePanel.TILESIZE / 2) * facing, (int)gamePanel.TILESIZE / 2,null);
 
     }

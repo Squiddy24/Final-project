@@ -1,95 +1,92 @@
 package main;
+
+//Imports needed for class
 import java.awt.Rectangle;
 
 public class CollisionChecker {
-    GamePanel gamePanel;
-    int leftCol;
-    int rightCol;
-    int topRow;
-    int bottomRow;
-    double zoomFactor;
-    //Tile[][] levelTiles = gamePanel.tileManager.levelTiles;
-
-    CollisionChecker(GamePanel gamePanel){
-        this.gamePanel = gamePanel;
-
-    }
 
     public void checkTile (Player player, GamePanel gamePanel){
-        int hitboxLeft = (int)player.hitbox.x;
-        int hitboxRight = (int)player.hitbox.x + player.hitbox.width;
-        int hitboxTop = (int)player.hitbox.y;
-        int hitboxBottom = (int)player.hitbox.y + player.hitbox.height;
-        zoomFactor = ((gamePanel.TILESIZE/64)) ;
 
-
+        //If the tiles exist
         if (gamePanel.tileManager.levelTiles != null){
+            //Loop over all tiles 
             for (int i = 0; i < gamePanel.tileManager.levelTiles[0].length; i++) {
                 for (int j = 0; j < gamePanel.tileManager.levelTiles.length; j++) {
-                    if(gamePanel.tileManager.levelTiles[j][i] != null){
-                        if (gamePanel.tileManager.levelTiles[j][i].collision == true){
+                    //If the tile has collision enabled
+                    if (gamePanel.tileManager.levelTiles[j][i].collision == true){
 
-                            float tileLeft = gamePanel.tileManager.levelTiles[j][i].pos[0];
-                            float tileRight = gamePanel.tileManager.levelTiles[j][i].pos[0] + 64;
-                            float tileTop = gamePanel.tileManager.levelTiles[j][i].pos[1];
-                            float tileBottom = gamePanel.tileManager.levelTiles[j][i].pos[1] + 64;
+                        //The sides of the tile
+                        float tileLeft = gamePanel.tileManager.levelTiles[j][i].pos[0];
+                        float tileRight = gamePanel.tileManager.levelTiles[j][i].pos[0] + 64;
+                        float tileTop = gamePanel.tileManager.levelTiles[j][i].pos[1];
+                        float tileBottom = gamePanel.tileManager.levelTiles[j][i].pos[1] + 64;
 
-                            Rectangle tileBounds = new Rectangle((int)tileLeft, (int)tileTop, 64, 64);
+                        //The bounds of the tile
+                        Rectangle tileBounds = new Rectangle((int)tileLeft, (int)tileTop, 64, 64);
+                        
+                        //If the tile intersects with the player hitbox
+                        if (tileBounds.intersects(player.hitbox)){
                             
-                            if (tileBounds.intersects(player.hitbox)){
+                            //The players distance to each side of the tile
+                            float DistTop = Math.abs(player.hitbox.y - tileBottom);
+                            float DistBottom = Math.abs(player.hitbox.y + player.hitbox.height - tileTop);
+                            float DistLeft = Math.abs(player.hitbox.x - tileRight);
+                            float DistRight = Math.abs(player.hitbox.x + player.hitbox.width - tileLeft);
+                            
+                            //Detects hits on the top of a tile and moves the player out of it
+                            if (DistBottom < DistLeft && DistBottom < DistRight && DistBottom < DistTop){
+                                player.worldPos.y = (int)Math.ceil(tileTop  - gamePanel.TILESIZE + 32);
 
-                                float DistTop = Math.abs(hitboxTop - tileBottom);
-                                float DistBottom = Math.abs(hitboxBottom - tileTop);
-                                float DistLeft = Math.abs(hitboxLeft - tileRight);
-                                float DistRight = Math.abs(hitboxRight - tileLeft);
-                                
-                                //Detects hits on the top of a block and moves the player out of it
-                                if (DistBottom < DistLeft && DistBottom < DistRight && DistBottom < DistTop){
-                                    //player_hitbox.bottom = block.rect.top + 1;
-                                    player.worldPos.y = (int)Math.ceil((tileTop * zoomFactor) - gamePanel.TILESIZE + 32);
-                                    player.accelerationDueToGravity = 0;
-                                    player.jumpVelocity = 0;
-                                    player.grounded = true;
-                                    player.canDash = true;
-                                }
+                                //Resets gravity
+                                player.accelerationDueToGravity = 0;
+                                player.jumpVelocity = 0;
 
-                                //Detects hits on the bottom of a block and moves the player out of it
-                                else if (DistTop < DistLeft && DistTop < DistRight && DistTop < DistBottom){
-                                    //self.player_hitbox.top = block.rect.bottom;
-                                    player.worldPos.y = (int)Math.ceil((tileBottom * zoomFactor));
-                                    player.jumping = false;
-                                    player.currentJumpTime = 0;
-                                    player.jumpVelocity = 0;
-
-
-                                }
-
-                                //Detects hits on the Left of a block and moves the player out of it
-                                else if (DistRight < DistLeft && DistRight < DistTop && DistRight < DistBottom){
-                                    //self.player_hitbox.right = block.rect.left;
-                                    player.worldPos.x = (int)Math.ceil((tileLeft * zoomFactor) - gamePanel.TILESIZE + 32);
-                                    player.runSpeed = -player.runSpeed / 3;
-
-                                }
-
-                                //Detects hits on the right of a block and moves the player out of it
-                                else if (DistLeft < DistRight && DistLeft < DistTop && DistLeft < DistBottom){
-                                    //self.player_hitbox.left = block.rect.right;
-                                    player.worldPos.x = (int)Math.ceil((tileRight * zoomFactor));
-                                    player.runSpeed = -player.runSpeed / 3;
-
-                                }           
-                            }            
-                        }
-                        if (gamePanel.tileManager.levelTiles[j][i].damage == true){
-
-                            Rectangle tileBounds = new Rectangle((int)gamePanel.tileManager.levelTiles[j][i].pos[0], (int)gamePanel.tileManager.levelTiles[j][i].pos[1], 64, 64);
-                            if (tileBounds.intersects(player.hitbox) && player.stunImmunity <= 0){
-                                player.currentStunTime = player.STUNDURATION;
-                                gamePanel.playSoundEffect(2);
+                                //Enables jumping and dashing
+                                player.grounded = true;
+                                player.canDash = true;
                             }
-                        }
+
+                            //Detects hits on the bottom of a tile and moves the player out of it
+                            else if (DistTop < DistLeft && DistTop < DistRight && DistTop < DistBottom){
+                                player.worldPos.y = (int)Math.ceil(tileBottom);
+
+                                //Ends the players jump
+                                player.jumping = false;
+                                player.currentJumpTime = 0;
+                                player.jumpVelocity = 0;
+
+
+                            }
+
+                            //Detects hits on the Left of a tile and moves the player out of it
+                            else if (DistRight < DistLeft && DistRight < DistTop && DistRight < DistBottom){
+                                player.worldPos.x = (int)Math.ceil(tileLeft - gamePanel.TILESIZE + 32);
+                                player.runSpeed = -player.runSpeed / 3; //Bounces the player away
+
+                            }
+
+                            //Detects hits on the right of a tile and moves the player out of it
+                            else if (DistLeft < DistRight && DistLeft < DistTop && DistLeft < DistBottom){
+                                player.worldPos.x = (int)Math.ceil(tileRight);
+                                player.runSpeed = -player.runSpeed / 3; //Bounces the player away
+
+                            }           
+                        }            
                     }
+
+                    //If the tile has damage enabled
+                    if (gamePanel.tileManager.levelTiles[j][i].damage == true){
+                        
+                        //The bounds of the tile
+                        Rectangle tileBounds = new Rectangle((int)gamePanel.tileManager.levelTiles[j][i].pos[0], (int)gamePanel.tileManager.levelTiles[j][i].pos[1], 64, 64);
+
+                        //If the tile intersects with the player and the player has no stun immunity
+                        if (tileBounds.intersects(player.hitbox) && player.stunImmunity <= 0){
+                            //Stun the player
+                            player.currentStunTime = player.STUNDURATION;
+                            gamePanel.playSoundEffect(2);
+                        }
+                    }          
                 }
             }
         }
