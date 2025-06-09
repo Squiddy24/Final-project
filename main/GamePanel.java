@@ -104,8 +104,8 @@ public class GamePanel extends JPanel implements Runnable{
     //Checks if a player has reached the end of the level
     public void checkForEndOfLevel(){
         //Finds the distance of both players to the goal
-        int distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player1.worldPos.x - endGoal[0],2) + Math.pow(player1.worldPos.y - endGoal[1],2))) / TILESIZE);
-        int distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldPos.x - endGoal[0],2) + Math.pow(player2.worldPos.y - endGoal[1],2))) / TILESIZE);
+        distanceToGoalP1 = (int)((Math.sqrt(Math.pow(player1.worldPos.x - endGoal[0],2) + Math.pow(player1.worldPos.y - endGoal[1],2))) / TILESIZE);
+        distanceToGoalP2 = (int)((Math.sqrt(Math.pow(player2.worldPos.x - endGoal[0],2) + Math.pow(player2.worldPos.y - endGoal[1],2))) / TILESIZE);
 
         //If eather player is less than 1 tile away from the goal
         if (distanceToGoalP1 < 1 || distanceToGoalP2 < 1 ){
@@ -114,10 +114,6 @@ public class GamePanel extends JPanel implements Runnable{
 
             //Start the end screen timer
             endScreenTimerCurrent = ENDSCREENTIMERMAX;
-
-            //Reset both players
-            player1 = new Player(this, inputP1, 1);
-            player2 = new Player(this, inputP2, 2);
 
             //Play a completion sound effect
             playSoundEffect(3);
@@ -220,6 +216,10 @@ public class GamePanel extends JPanel implements Runnable{
         if (endScreenTimerCurrent <= 0) {
             //If the timer reaches 0 set the state to main menu
             menuState = "MAIN";
+
+            //Reset both players
+            player1 = new Player(this, inputP1, 1);
+            player2 = new Player(this, inputP2, 2);
         }
             endScreenTimerCurrent -= 1;
     }
@@ -248,22 +248,22 @@ public class GamePanel extends JPanel implements Runnable{
         //Draws the current state
         switch (menuState) {
             case "MAIN":
-                menu.draw(g2,this, SCREENDIMENSIONS); //main menu
+                menu.draw(g2,this, SCREENDIMENSIONS); //Main menu
                 break;
 
             case "END":
-                endScreen.draw(g2, distanceToGoalP1, distanceToGoalP2, this, SCREENDIMENSIONS); //end screen
+                endScreen.draw(g2, distanceToGoalP1, distanceToGoalP2, this, SCREENDIMENSIONS); //End screen
                 break;
         
             default:
                 //main game
-                tileManager.draw(g2, playerAverage.x, playerAverage.y - CAMERAOFFSETY); //level tiles
+                tileManager.draw(g2, playerAverage.x, playerAverage.y - CAMERAOFFSETY); //Level tiles
                 player1.drawPlayer(g2); //player 1
                 player2.drawPlayer(g2); //player 2
                 break;
         }
 
-        g2.dispose(); //removes unused stored data
+        g2.dispose(); //Removes unused stored data
     }
 
     //Plays the main theme
