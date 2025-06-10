@@ -51,6 +51,42 @@ public class TileManager {
         }
     }
 
+    //Reads the lines in the file and add them to the tile map
+    public void readLines(String levelFilePath, BufferedReader br, String line){
+            
+        //Trys to read the next line
+            try {
+                line = br.readLine();
+
+                //While there are more lines
+                if (line != null){
+                    //Split the line into characters
+                    String[] characters = line.split(" ");
+
+                    //Create a list of numbers
+                    int[] numLine = new int[characters.length];
+
+                    //Copy each character into the number line as an intager
+                    for (int i = 0; i < characters.length; i++) {
+                    numLine[i] = Integer.parseInt(characters[i]);
+                    }
+
+                    //Add the line to the tilemap
+                    tileMap.add(numLine);
+
+                    //Read the next line
+                    readLines(levelFilePath, br, line);
+                }
+
+                //close the buffer reader
+                br.close();
+
+            //If there is no line to read return
+            } catch (Exception e) {
+                return;
+            }
+    }
+
     //Loads the given level
     public void loadLevel (String levelFilePath){
         //Clears the tilemap
@@ -60,29 +96,13 @@ public class TileManager {
             BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(levelFilePath)));
 
             //The current line
-            String line;
+            String line = "";
 
-            //While there are more lines
-            while ((line = br.readLine()) != null) {
-                //Split the line into characters
-                String[] characters = line.split(" ");
+            //Read the lines
+            readLines(levelFilePath, br, line);
 
-                //Create a list of numbers
-                int[] numLine = new int[characters.length];
-
-                //Copy each character into the number line as an intager
-                for (int i = 0; i < characters.length; i++) {
-                    numLine[i] = Integer.parseInt(characters[i]);
-                }
-
-                //Add the line to the tilemap
-                tileMap.add(numLine);
-            }
-
-            //Close the reader
-            br.close();
         } catch (Exception e) {
-            e.printStackTrace(); //Print an error if the level file cannot be found
+            System.out.println("Error Reading Level File"); //Displays an error is the file cannor be read
         }
 
         //Update the size of level tiles

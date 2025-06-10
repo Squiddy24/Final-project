@@ -10,12 +10,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 
-public class MenuManger implements MouseListener {
+public class MenuManager implements MouseListener {
 
     //Sets the list of buttons
     Button[] buttons;
 
-    public MenuManger(Button[] buttons){
+    public MenuManager(Button[] buttons){
         this.buttons = buttons;
     }
 
@@ -30,7 +30,27 @@ public class MenuManger implements MouseListener {
         //Draws the text
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("STIX Two Math", Font.BOLD, 64));
-        g2.drawString("SELECT A LEVEL", 340, 400);
+        g2.drawString("SELECT A LEVEL", 320, 400);
+
+        //Displays the controlls for player 1
+        g2.setColor(new Color(135,229,163));
+        g2.setFont(new Font("STIX Two Math", Font.PLAIN, 32));
+        g2.drawString("Player 1", 120, 375);
+        g2.drawString("WASD to Move", 70, 405);
+        g2.drawString("Space to Jump", 80, 435);
+        g2.drawString("Shift to Dash", 90, 465);
+
+        //Displays the controlls for player 2
+        g2.setColor(new Color(229,135,135));
+        g2.setFont(new Font("STIX Two Math", Font.PLAIN, 32));
+        g2.drawString("Player 2", 920, 375);
+        g2.drawString("IJKL to Move", 870, 405);
+        g2.drawString("} to Jump", 900, 435);
+        g2.drawString("\\ to Dash", 905, 465);
+
+
+
+
 
         //Draws each button
         for (Button button : buttons) {

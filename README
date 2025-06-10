@@ -1,0 +1,25 @@
+Aidan McLeod
+ICS4U Final Assignment
+June 9 2025
+
+This is a game called Higher Velocity Hijinks. In this game players race to reach the end of 5 unique levels.
+
+Player one is controlled with WASD, can jump with space and can dash by holding pressing the corosponding WASD directions then pressing shift
+
+Player two is controlled with IJKL, can jump with "}" and can dash by holding pressing the corosponding IJKL directions then pressing "\"
+
+Scattered throughout the levels are dangorious magma bricks that will stun the player, slowing them down, if hit
+
+This Project contains 12 java files:
+    - AudioManager.java
+    - Button.java
+    - CollisionChecker.java
+    - EndScreenManager.java
+    - GamePanel.java
+    - ImageManager.java
+    - InputManager.java
+    - Main.java
+    - MenuManager.java
+    - Player.java
+    - Tile.java
+    - TileManager.java

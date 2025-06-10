@@ -18,7 +18,7 @@ public class Player {
 
     //Position of player
     public Point worldPos = new Point(100,100); //Players position in the world
-    private Point screenPos = new Point(); //Players position on the screen
+    public Point screenPos = new Point(); //Players position on the screen
 
     //Game panel and input manager
     GamePanel gamePanel;
@@ -43,7 +43,7 @@ public class Player {
     //Jump Stuff
     private final int JUMPPOWER = 6;
     private final int KYODIETIME = 30;
-    private final int MAXJUMPLENGTH = 30;
+    private final int MAXJUMPLENGTH = 40;
     public float jumpVelocity;
     public float currentJumpTime = 0;
     public boolean jumping;
@@ -52,26 +52,26 @@ public class Player {
     private int currentKyodieTime = 0; //Time a play can run off a tile before they are no longer able to jump
 
     //Runing
-    private final float MAXRUNSPEED = 5;
-    private final float RUNACCELERATION = 0.05f;
+    private final float MAXRUNSPEED = 4;
+    private final float RUNACCELERATION = 0.1f;
     private final float RUNDECELERATION = 0.2f;
     public float runSpeed = 0; //Current running speed
 
     //Dashing
-    final int MAXDASHTIME = 30;
+    final int MAXDASHTIME = 20;
     final int DASHCOOLDOWN = 40;
-    final float DASHPOWER = 7;
+    final float DASHPOWER = 8;
     private int lastDirection = 1; //Last direction the player was pressing 1-8
-    private boolean dashing;
+    public boolean dashing;
     private int currentDashTime;
-    private int currentDashCooldown;
+    public int currentDashCooldown;
     public boolean canDash = true;
     private float xCarryoverMomentum = 0;// X momentum carryed over from a dash
     private float yCarryoverMomentum = 0;// Y momentum carryed over from a dash
 
     //Stun
     public final int STUNDURATION = 60;
-    private final int IMMUNITYDURATION = 240; // The duration in which a player cannot be damaged again
+    private final int IMMUNITYDURATION = 60; // The duration in which a player cannot be damaged again
     public int currentStunTime = 0;
     public int stunImmunity = 120;
 

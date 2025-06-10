@@ -13,7 +13,8 @@ public class CollisionChecker {
             for (int i = 0; i < gamePanel.tileManager.levelTiles[0].length; i++) {
                 for (int j = 0; j < gamePanel.tileManager.levelTiles.length; j++) {
                     //If the tile has collision enabled
-                    if (gamePanel.tileManager.levelTiles[j][i].collision == true){
+                    try {
+                        if (gamePanel.tileManager.levelTiles[j][i].collision == true){
 
                         //The sides of the tile
                         float tileLeft = gamePanel.tileManager.levelTiles[j][i].pos[0];
@@ -27,6 +28,12 @@ public class CollisionChecker {
                         //If the tile intersects with the player hitbox
                         if (tileBounds.intersects(player.hitbox)){
                             
+                            //Ends the dash
+                            if (player.dashing){
+                                player.currentDashCooldown = player.DASHCOOLDOWN;
+                                player.dashing = false;
+                            }
+
                             //The players distance to each side of the tile
                             float DistTop = Math.abs(player.hitbox.y - tileBottom);
                             float DistBottom = Math.abs(player.hitbox.y + player.hitbox.height - tileTop);
@@ -60,14 +67,14 @@ public class CollisionChecker {
 
                             //Detects hits on the Left of a tile and moves the player out of it
                             else if (DistRight < DistLeft && DistRight < DistTop && DistRight < DistBottom){
-                                player.worldPos.x = (int)Math.ceil(tileLeft - gamePanel.TILESIZE + 32);
+                                player.worldPos.x = (int)Math.ceil(tileLeft - gamePanel.TILESIZE + 32 - 1);
                                 player.runSpeed = -player.runSpeed / 3; //Bounces the player away
 
                             }
 
                             //Detects hits on the right of a tile and moves the player out of it
                             else if (DistLeft < DistRight && DistLeft < DistTop && DistLeft < DistBottom){
-                                player.worldPos.x = (int)Math.ceil(tileRight);
+                                player.worldPos.x = (int)Math.ceil(tileRight + 1);
                                 player.runSpeed = -player.runSpeed / 3; //Bounces the player away
 
                             }           
@@ -86,7 +93,11 @@ public class CollisionChecker {
                             player.currentStunTime = player.STUNDURATION;
                             gamePanel.playSoundEffect(2);
                         }
-                    }          
+                    } 
+                            
+                    } catch (Exception e) {
+                        System.out.println("broken :(");
+                    }
                 }
             }
         }

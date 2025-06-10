@@ -8,16 +8,19 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+
+import javax.print.DocFlavor.STRING;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import java.awt.Font;
 
 public class GamePanel extends JPanel implements Runnable{
     //Managers
-    TileManager tileManager = new TileManager(this); //Responsible for rendering the game tiles
-    AudioManager audioHandler = new AudioManager(); //Responsible playing audio
-    EndScreenManager endScreen = new EndScreenManager(); //Responsible for rendering the end screen
-    MenuManger menu = new MenuManger(setButtons()); //Responsible for rendering the start screen
-    CollisionChecker collisionChecker = new CollisionChecker(); //Responsible for checking collisions
+    public TileManager tileManager = new TileManager(this); //Responsible for rendering the game tiles
+    public AudioManager audioHandler = new AudioManager(); //Responsible playing audio
+    public EndScreenManager endScreen = new EndScreenManager(); //Responsible for rendering the end screen
+    public MenuManager menu = new MenuManager(setButtons()); //Responsible for rendering the start screen
+    public CollisionChecker collisionChecker = new CollisionChecker(); //Responsible for checking collisions
 
     //Settings of the screen
     private final Dimension SCREENDIMENSIONS = new Dimension(1152, 768); //18 by 12 tiles times 64 pixels per tile
@@ -34,12 +37,13 @@ public class GamePanel extends JPanel implements Runnable{
     private String menuState = "MAIN";
 
     //The timer of the end screen
-    final int ENDSCREENTIMERMAX = 120;
-    int endScreenTimerCurrent;
+    private final int ENDSCREENTIMERMAX = 120;
+    private int endScreenTimerCurrent;
+    int time;
 
     //The input managers for the players
     private InputManager inputP1 = new InputManager(KeyEvent.VK_W,KeyEvent.VK_S,KeyEvent.VK_A,KeyEvent.VK_D, KeyEvent.VK_SPACE, KeyEvent.VK_SHIFT); 
-    private InputManager inputP2 = new InputManager(KeyEvent.VK_UP,KeyEvent.VK_DOWN,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT, KeyEvent.VK_M, KeyEvent.VK_N); 
+    private InputManager inputP2 = new InputManager(KeyEvent.VK_I,KeyEvent.VK_K,KeyEvent.VK_J,KeyEvent.VK_L, KeyEvent.VK_CLOSE_BRACKET, KeyEvent.VK_BACK_SLASH); 
 
     //The two players
     public Player player1 = new Player(this, inputP1, 1);
@@ -47,10 +51,10 @@ public class GamePanel extends JPanel implements Runnable{
     public Point playerAverage = new Point(0,0);
 
     //The thread the game will run on so it can be parallel to other process
-    Thread gameThread;
+    private Thread gameThread;
 
     //The window the game panel sits on
-    JFrame window;
+    private JFrame window;
 
     //Constructor of the gamepanel
     public GamePanel(JFrame window){
@@ -155,7 +159,6 @@ public class GamePanel extends JPanel implements Runnable{
                         if (menuState == "MAIN"){
                             //Loads level 3
                             menuState = "GAME";
-                            System.out.println("click");
                             tileManager.loadLevel("/main/LevelData/3.txt");
                             player1.worldPos = new Point(129,704);
                             player2.worldPos = new Point(129,704);
@@ -207,8 +210,24 @@ public class GamePanel extends JPanel implements Runnable{
     
     //Finds the adverage of players
     public Point getPlayerAverage(){
-        return new Point((int)((player1.worldPos.x + player2.worldPos.x + TILESIZE) / 2),
-                         (int)((player1.worldPos.y + player2.worldPos.y + TILESIZE) / 2));
+        //Get the distance between players
+        int distanceBetweenPlayers = (int)((Math.sqrt(Math.pow(player1.worldPos.x - player2.worldPos.x,2) + Math.pow(player1.worldPos.y - player2.worldPos.y,2))));
+        
+        //If the distance is greater than the width of the screen
+        if (distanceBetweenPlayers > SCREENDIMENSIONS.getWidth()){
+            
+            
+            //Set the camera to which ever player is closer to the goal
+            if (distanceToGoalP1 < distanceToGoalP2){
+                return player1.worldPos;
+            }else{
+                return player2.worldPos;
+            }
+        }else{
+            //Else set the camera to the average position of the two players
+            return new Point((int)((player1.worldPos.x + player2.worldPos.x + TILESIZE) / 2),
+                             (int)((player1.worldPos.y + player2.worldPos.y + TILESIZE) / 2));
+        }
     }
 
     //Updates the ending timer
@@ -216,7 +235,7 @@ public class GamePanel extends JPanel implements Runnable{
         if (endScreenTimerCurrent <= 0) {
             //If the timer reaches 0 set the state to main menu
             menuState = "MAIN";
-
+            time = 0;
             //Reset both players
             player1 = new Player(this, inputP1, 1);
             player2 = new Player(this, inputP2, 2);
@@ -257,13 +276,30 @@ public class GamePanel extends JPanel implements Runnable{
         
             default:
                 //main game
+
                 tileManager.draw(g2, playerAverage.x, playerAverage.y - CAMERAOFFSETY); //Level tiles
                 player1.drawPlayer(g2); //player 1
                 player2.drawPlayer(g2); //player 2
+
+                //Draws the timer
+                drawTimer(g2);
+                
                 break;
         }
 
         g2.dispose(); //Removes unused stored data
+    }
+
+    //Displays a timer of the level
+    public void drawTimer(Graphics2D g2){
+        //Updates the timer
+        time ++;
+
+        //Renders the text
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("STIX Two Math", Font.BOLD, 32));
+        g2.drawString("TIME: " + time / 120 + ":" + String.format("%03d", (int)(time - (Math.floor(time/120) * 120))), 20,50);
+
     }
 
     //Plays the main theme

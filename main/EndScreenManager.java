@@ -16,7 +16,6 @@ public class EndScreenManager {
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("STIX Two Math", Font.BOLD, 64));
 
-        System.out.println(distanceToGoalP1 + " " + distanceToGoalP2);
         //Changes the text based on which player reached the goal
         if (distanceToGoalP1 < distanceToGoalP2){
             g2.drawString("Player 1 Wins", 390, 400);
